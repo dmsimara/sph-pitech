@@ -97,7 +97,7 @@ class Reports(BaseModel):
     management_code: str # encrypted string
     created_at: str
     updated_at: str
-    flags: Optional[List[dict]] = []
+    flag_count: int = 0
 
 class Responses(BaseModel):
     report_id: str
@@ -177,7 +177,7 @@ async def submit_report(report: ReportCreate):
                 print(f"Error uploading photo to S3: {e}")
 
     # Hash the management code
-    hashed_management_code = bcrypt.haspw(report.management_code.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    hashed_management_code = bcrypt.hashpw(report.management_code.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     status = "completed" if report.is_surrendered else "unclaimed"
     
@@ -273,22 +273,21 @@ async def flag_report(report_id: str, flag: FlagCreate):
             'created_at': datetime.utcnow().isoformat()
         }
 
-        # Add the flag to the report's flags' array
-        flags = report.get('flags', [])
-        flags.append(flag_data)
+        # Save data into Flags table
+        flags_table.put_item(Item=flag_data)
         
-        # Count total flags
-        total_flags = len(flags)
-
         # Update the report
+        current_count = report.get('flag_count', 0)
+        new_count = current_count + 1
+
         reports_table.update_item(
             Key={'report_id': report_id},
-            UpdateExpression="SET flags = :flags",
-            ExpressionAttributeValues={':flags': flags}
+            UpdateExpression="SET flag_count = :count",
+            ExpressionAttributeValues={':count': new_count}
         )
 
         # Delete the report if exceed the threshold
-        if total_flags >= 3:
+        if new_count >= 3:
             # Delete photos - S3
             photos = report.get('photo', [])
             for photo_key in photos:
@@ -394,6 +393,7 @@ async def get_all_responses(report_id: str, management_code: str):
         responses = []
         for item in responses_response.get('Items', []):
             responses.append({
+                "report_id": item["report_id"],
                 "response_id": item["response_id"],
                 "name": item["name"],
                 "contact_info": item["contact_info"],
@@ -401,23 +401,7 @@ async def get_all_responses(report_id: str, management_code: str):
                 "created_at": item["created_at"]
             })
 
-        return {
-            "report": {
-                "report_id": report["report_id"],
-                "type": report["type"],
-                "item_name": report["item_name"],
-                "description": report["description"],
-                "contact_info": report["contact_info"],
-                "status": report["status"],
-                "photo": report.get("photo", []),
-                "photo_urls": report.get("photo_urls", []),
-                "is_surrendered": report.get("is_surrendered", False),
-                "created_at": report["created_at"],
-                "updated_at": report["updated_at"],
-                "flags": report.get("flags", [])
-            },
-            "responses": responses
-        }
+        return responses
     
     except HTTPException:
         raise
@@ -527,7 +511,6 @@ async def get_representative(section_id: str):
 # Updating a specific report
 @app.put("/reports/{report_id}", response_model=Reports)
 async def update_report(report_id: str, report_update: ReportUpdate, management_code: str):
-    
     try:
         # Fetch the existing report
         report_response = reports_table.get_item(Key={'report_id': report_id})
@@ -539,79 +522,97 @@ async def update_report(report_id: str, report_update: ReportUpdate, management_
         # Verify management code
         if not bcrypt.checkpw(management_code.encode('utf-8'), existing_report['management_code'].encode('utf-8')):
             raise HTTPException(status_code=403, detail="Invalid management code")
+
+        # Build update expressions dynamically
+        update_expression = []
+        expression_attribute_values = {}
+        expression_attribute_names = {}
+
+        # Always update updated_at
+        update_expression.append("#updated_at = :updated_at")
+        expression_attribute_names["#updated_at"] = "updated_at"
+        expression_attribute_values[":updated_at"] = datetime.utcnow().isoformat()
+
+        # Optional fields
+        if report_update.item_name is not None:
+            update_expression.append("#item_name = :item_name")
+            expression_attribute_names["#item_name"] = "item_name"
+            expression_attribute_values[":item_name"] = report_update.item_name
         
-        # Update expression and values
-        update_expression = "SET updated_at = :updated_at"
-        expression_attribute_values = {':updated_at': datetime.utcnow().isoformat()}
+        if report_update.description is not None:
+            update_expression.append("#description = :description")
+            expression_attribute_names["#description"] = "description"
+            expression_attribute_values[":description"] = report_update.description
+
+        if report_update.contact_info is not None:
+            update_expression.append("#contact_info = :contact_info")
+            expression_attribute_names["#contact_info"] = "contact_info"
+            expression_attribute_values[":contact_info"] = report_update.contact_info
+
+        if report_update.status is not None:
+            update_expression.append("#status = :status")
+            expression_attribute_names["#status"] = "status"
+            expression_attribute_values[":status"] = report_update.status
+
+        if report_update.is_surrendered is not None:
+            update_expression.append("#is_surrendered = :is_surrendered")
+            expression_attribute_names["#is_surrendered"] = "is_surrendered"
+            expression_attribute_values[":is_surrendered"] = report_update.is_surrendered
 
         # Handle photo updates
         new_photo_urls = []
         if report_update.photo is not None:
-            # Delete old photos from S3
-            old_photos = existing_report.get('photo', [])
-            for old_photo_key in old_photos:
+            # Delete old photos
+            for old_photo_key in existing_report.get('photo', []):
                 try:
                     s3_client.delete_object(Bucket=S3_BUCKET, Key=old_photo_key)
                 except Exception as e:
-                    print(f"Error deleting old photo {old_photo_key}: {e}")
+                    print(f"Error deleting photo {old_photo_key}: {e}")
 
-            # Upload new photo
+            # Upload new photos
+            new_photo_keys = []
             for photo_data in report_update.photo:
                 try:
                     photo_key = f"reports/{report_id}/{uuid.uuid4()}.jpg"
                     s3_client.put_object(
-                        Bucket=S3_BUCKET, 
+                        Bucket=S3_BUCKET,
                         Key=photo_key,
                         Body=photo_data.encode() if isinstance(photo_data, str) else photo_data,
                         ContentType='image/jpeg'
                     )
+                    new_photo_keys.append(photo_key)
                     new_photo_urls.append(f"s3://{S3_BUCKET}/{photo_key}")
-                
                 except Exception as e:
                     print(f"Error uploading new photo: {e}")
 
-            update_expression += ", photo = :photo, photo_urls = :photo_urls"
-            expression_attribute_values[':photo'] = report_update.photo
+            update_expression.append("#photo = :photo")
+            expression_attribute_names["#photo"] = "photo"
+            expression_attribute_values[":photo"] = new_photo_keys
 
-        # Add other fields to update if provided
-        if report_update.item_name is not None:
-            update_expression += ", item_name = :item_name"
-            expression_attribute_values[':item_name'] = report_update.item_name
-            
-        if report_update.description is not None:
-            update_expression += ", description = :description"
-            expression_attribute_values[':description'] = report_update.description
-            
-        if report_update.contact_info is not None:
-            update_expression += ", contact_info = :contact_info"
-            expression_attribute_values[':contact_info'] = report_update.contact_info
-            
-        if report_update.status is not None:
-            update_expression += ", status = :status"
-            expression_attribute_values[':status'] = report_update.status
-            
-        if report_update.is_surrendered is not None:
-            update_expression += ", is_surrendered = :is_surrendered"
-            expression_attribute_values[':is_surrendered'] = report_update.is_surrendered
+            update_expression.append("#photo_urls = :photo_urls")
+            expression_attribute_names["#photo_urls"] = "photo_urls"
+            expression_attribute_values[":photo_urls"] = new_photo_urls
 
-        # Update report in DynamoDB
+        if not update_expression:
+            raise HTTPException(status_code=400, detail="No fields provided for update.")
+
+        # Perform update
         response = reports_table.update_item(
             Key={'report_id': report_id},
-            UpdateExpression=update_expression,
+            UpdateExpression="SET " + ", ".join(update_expression),
+            ExpressionAttributeNames=expression_attribute_names,
             ExpressionAttributeValues=expression_attribute_values,
             ReturnValues='ALL_NEW'
         )
 
         updated_report = response['Attributes']
 
-        # Generate presigned URLs for photos
-        photo_urls = []
-        if updated_report.get('photo_urls'):
-            photo_urls = updated_report['photo_urls']
-        elif updated_report.get('photo'):
+        # Use URLs if stored, else generate them
+        photo_urls = updated_report.get('photo_urls', [])
+        if not photo_urls and updated_report.get('photo'):
             photo_urls = generate_presigned_url(updated_report['photo'])
 
-        # Build the updated report
+        # Build response
         return Reports(
             report_id=updated_report['report_id'],
             type=updated_report['type'],
@@ -626,7 +627,7 @@ async def update_report(report_id: str, report_update: ReportUpdate, management_
             created_at=updated_report['created_at'],
             updated_at=updated_report['updated_at']
         )
-    
+
     except HTTPException:
         raise
     except Exception as e:
@@ -675,6 +676,23 @@ async def delete_report(report_id: str, management_code: str):
         except Exception as e:
             print(f"Error deleting responses: {e}")
 
+        # Delete associated flags
+        try:
+            flags_response = flags_table.query(
+                KeyConditionExpression='report_id = :report_id',
+                ExpressionAttributeValues={':report_id': report_id}
+            )
+
+            for flag_item in flags_response.get('Items', []):
+                flags_table.delete_item(
+                    Key={
+                        'report_id': report_id,
+                        'flag_id': flag_item['flag_id']
+                    }
+                )
+        except Exception as e:
+            print(f"Error deleting flags: {e}")
+
         # Delete the report
         reports_table.delete_item(Key={'report_id': report_id})
 
@@ -705,7 +723,7 @@ async def mark_completed(report_id: str, management_code: str):
         response = reports_table.update_item(
             Key={'report_id': report_id},
             UpdateExpression="SET #status = :status, updated_at = :updated_at",
-            ExpressionAttributeName={'#status':'status'},
+            ExpressionAttributeNames={'#status':'status'},
             ExpressionAttributeValues={
                 ':status': 'completed',
                 ':updated_at': datetime.utcnow().isoformat()
