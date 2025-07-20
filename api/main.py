@@ -7,6 +7,7 @@ import bcrypt
 import uuid
 from typing import List, Optional
 from datetime import datetime
+from urllib.parse import urlparse
 
 # Initializing FastAPI
 app = FastAPI(title="PUPSeek", version="1.0.0", description="API for managing reports and info")
@@ -633,7 +634,6 @@ async def update_report(report_id: str, report_update: ReportUpdate, management_
 # Deleting a specific report
 @app.delete("/reports/{report_id}")
 async def delete_report(report_id: str, management_code: str):
-    
     try:
         # Fetch existing report
         report_response = reports_table.get_item(Key={'report_id': report_id})
@@ -646,23 +646,23 @@ async def delete_report(report_id: str, management_code: str):
         if not bcrypt.checkpw(management_code.encode('utf-8'), existing_report['management_code'].encode('utf-8')):
             raise HTTPException(status_code=403, detail="Invalid management code")
         
-        # Delete assoc. photo from S3
-        photos = existing_report.get('photo', [])
-        for photo_key in photos:
+        # Delete associated photo(s) from S3
+        photo_urls = existing_report.get("photo_urls", [])
+        for url in photo_urls:
             try:
+                parsed = urlparse(url)
+                photo_key = parsed.path.lstrip('/') 
                 s3_client.delete_object(Bucket=S3_BUCKET, Key=photo_key)
+                print(f"Deleted S3 photo: {photo_key}")
             except Exception as e:
-                print(f"Error deleting photo {photo_key}: {e}")
+                print(f"Error deleting photo {url}: {e}")
 
-        # Delete all assoc. responses 
+        # Delete all associated responses
         try:
-            # Query responses
             responses_response = responses_table.query(
                 KeyConditionExpression='report_id = :report_id',
                 ExpressionAttributeValues={':report_id': report_id}
             )
-
-            # Delete
             for response_item in responses_response.get('Items', []):
                 responses_table.delete_item(
                     Key={
@@ -679,7 +679,6 @@ async def delete_report(report_id: str, management_code: str):
                 KeyConditionExpression='report_id = :report_id',
                 ExpressionAttributeValues={':report_id': report_id}
             )
-
             for flag_item in flags_response.get('Items', []):
                 flags_table.delete_item(
                     Key={
@@ -690,16 +689,15 @@ async def delete_report(report_id: str, management_code: str):
         except Exception as e:
             print(f"Error deleting flags: {e}")
 
-        # Delete the report
+        # Delete the report itself
         reports_table.delete_item(Key={'report_id': report_id})
 
         return {"message": "Report and all associated data deleted successfully!"}
-    
+
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting report: {str(e)}")
-
 
 # Marking a report as completed
 @app.patch("/reports/{report_id}/status", response_model=Reports)
