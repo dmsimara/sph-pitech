@@ -119,7 +119,6 @@ class ReportCreate(BaseModel):
     item_name: str
     description: str
     contact_info: str
-    photo: Optional[List[str]] = []
     is_surrendered: bool = False
     management_code: str
 
@@ -157,31 +156,12 @@ async def submit_report(report: ReportCreate):
     if not report.type or not report.description or not report.contact_info or not report.management_code:
         raise HTTPException(status_code=400, detail="Missing required fields: type, description, contact_info, management_code")
     
-    # Generate unique report ID
     report_id = str(uuid.uuid4())
-    
-    # Photo uploads to S3
-    photo_urls = []
-    if report.photo and len(report.photo) > 0:
-        for photo_data in report.photo:
-            try:
-                photo_key = f"reports/{report_id}/{uuid.uuid4()}.jpg"
-                s3_client.put_object(
-                    Bucket=S3_BUCKET,
-                    Key=photo_key,
-                    Body=photo_data.encode() if isinstance(photo_data, str) else photo_data,
-                    ContentType='image/jpeg'
-                )
-                photo_urls.append(f"s3://{S3_BUCKET}/{photo_key}")
-            except Exception as e:
-                print(f"Error uploading photo to S3: {e}")
+    status = "completed" if report.is_surrendered else "unclaimed"
+    timestamp = datetime.utcnow().isoformat()
 
     # Hash the management code
     hashed_management_code = bcrypt.hashpw(report.management_code.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-    status = "completed" if report.is_surrendered else "unclaimed"
-    
-    timestamp = datetime.utcnow().isoformat()
 
     # Create report item
     report_item = {
@@ -191,13 +171,13 @@ async def submit_report(report: ReportCreate):
         'description': report.description,
         'contact_info': report.contact_info,
         'status': status,
-        'photo': report.photo or [],
-        'photo_urls': photo_urls,
+        'photo': [], 
+        'photo_urls': [],  
         'is_surrendered': report.is_surrendered,
         'management_code': hashed_management_code,
         'created_at': timestamp,
         'updated_at': timestamp,
-        'flags': []
+        'flag_count': 0
     }
 
     # Save to DynamoDB
@@ -206,14 +186,71 @@ async def submit_report(report: ReportCreate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error saving report: {str(e)}")
     
-    # Confirmation 
-    confirmation_message = "Lost item report submitted successfully!" if report.type.lower() == "lost" else "Found item report submitted successfully!"
+    message = "Lost item report submitted successfully!" if report.type.lower() == "lost" else "Found item report submitted successfully!"
 
     return {
-        "message": confirmation_message,
+        "message": message,
         "report_id": report_id,
         **report_item
     }
+
+# Saves uploaded image
+@app.post("/reports/{report_id}/upload_photo")
+async def upload_photo(report_id: str, photo: UploadFile = File(...)):
+    try:
+        # Fetch report
+        report = reports_table.get_item(Key={"report_id": report_id}).get("Item")
+
+        if not report:
+            raise HTTPException(status_code=404, detail="Report not found")
+
+        old_urls = report.get("photo_urls", [])
+
+        # Delete old photos
+        for url in old_urls:
+            if url.startswith("https://"):
+                key = url.split(".amazonaws.com/")[-1]
+            elif url.startswith("s3://"):
+                key = url.replace(f"s3://{S3_BUCKET}/", "")
+            else:
+                continue  
+
+            try:
+                s3_client.delete_object(Bucket=S3_BUCKET, Key=key)
+            except Exception as e:
+                print(f"Failed to delete old image: {e}")  
+
+        # Upload new photo
+        contents = await photo.read()
+        photo_key = f"reports/{report_id}/{uuid.uuid4()}.jpg"
+
+        s3_client.put_object(
+            Bucket=S3_BUCKET,
+            Key=photo_key,
+            Body=contents,
+            ContentType=photo.content_type
+        )
+
+        new_url = f"https://{S3_BUCKET}.s3.amazonaws.com/{photo_key}"
+
+        # Update Reports table
+        reports_table.update_item(
+            Key={"report_id": report_id},
+            UpdateExpression="SET photo_urls = :urls, photo = :single, updated_at = :updated",
+            ExpressionAttributeValues={
+                ":urls": [new_url],
+                ":single": new_url,
+                ":updated": datetime.utcnow().isoformat()
+            }
+        )
+
+        return {
+            "message": "Photo uploaded successfully",
+            "photo_url": new_url
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 # Create a new response
 @app.post("/reports/{report_id}/responses", response_model=Responses)
@@ -512,7 +549,7 @@ async def get_representative(section_id: str):
 @app.put("/reports/{report_id}", response_model=Reports)
 async def update_report(report_id: str, report_update: ReportUpdate, management_code: str):
     try:
-        # Fetch the existing report
+        # Fetch the report
         report_response = reports_table.get_item(Key={'report_id': report_id})
         if 'Item' not in report_response:
             raise HTTPException(status_code=404, detail="Report not found")
@@ -523,12 +560,11 @@ async def update_report(report_id: str, report_update: ReportUpdate, management_
         if not bcrypt.checkpw(management_code.encode('utf-8'), existing_report['management_code'].encode('utf-8')):
             raise HTTPException(status_code=403, detail="Invalid management code")
 
-        # Build update expressions dynamically
+        # Build update
         update_expression = []
         expression_attribute_values = {}
         expression_attribute_names = {}
 
-        # Always update updated_at
         update_expression.append("#updated_at = :updated_at")
         expression_attribute_names["#updated_at"] = "updated_at"
         expression_attribute_values[":updated_at"] = datetime.utcnow().isoformat()
@@ -559,44 +595,10 @@ async def update_report(report_id: str, report_update: ReportUpdate, management_
             expression_attribute_names["#is_surrendered"] = "is_surrendered"
             expression_attribute_values[":is_surrendered"] = report_update.is_surrendered
 
-        # Handle photo updates
-        new_photo_urls = []
-        if report_update.photo is not None:
-            # Delete old photos
-            for old_photo_key in existing_report.get('photo', []):
-                try:
-                    s3_client.delete_object(Bucket=S3_BUCKET, Key=old_photo_key)
-                except Exception as e:
-                    print(f"Error deleting photo {old_photo_key}: {e}")
-
-            # Upload new photos
-            new_photo_keys = []
-            for photo_data in report_update.photo:
-                try:
-                    photo_key = f"reports/{report_id}/{uuid.uuid4()}.jpg"
-                    s3_client.put_object(
-                        Bucket=S3_BUCKET,
-                        Key=photo_key,
-                        Body=photo_data.encode() if isinstance(photo_data, str) else photo_data,
-                        ContentType='image/jpeg'
-                    )
-                    new_photo_keys.append(photo_key)
-                    new_photo_urls.append(f"s3://{S3_BUCKET}/{photo_key}")
-                except Exception as e:
-                    print(f"Error uploading new photo: {e}")
-
-            update_expression.append("#photo = :photo")
-            expression_attribute_names["#photo"] = "photo"
-            expression_attribute_values[":photo"] = new_photo_keys
-
-            update_expression.append("#photo_urls = :photo_urls")
-            expression_attribute_names["#photo_urls"] = "photo_urls"
-            expression_attribute_values[":photo_urls"] = new_photo_urls
-
         if not update_expression:
             raise HTTPException(status_code=400, detail="No fields provided for update.")
 
-        # Perform update
+        # Update
         response = reports_table.update_item(
             Key={'report_id': report_id},
             UpdateExpression="SET " + ", ".join(update_expression),
@@ -607,12 +609,6 @@ async def update_report(report_id: str, report_update: ReportUpdate, management_
 
         updated_report = response['Attributes']
 
-        # Use URLs if stored, else generate them
-        photo_urls = updated_report.get('photo_urls', [])
-        if not photo_urls and updated_report.get('photo'):
-            photo_urls = generate_presigned_url(updated_report['photo'])
-
-        # Build response
         return Reports(
             report_id=updated_report['report_id'],
             type=updated_report['type'],
@@ -621,11 +617,12 @@ async def update_report(report_id: str, report_update: ReportUpdate, management_
             contact_info=updated_report['contact_info'],
             status=updated_report['status'],
             photo=updated_report.get('photo', []),
-            photo_urls=photo_urls,
+            photo_urls=updated_report.get('photo_urls', []),
             is_surrendered=updated_report.get('is_surrendered', False),
             management_code=updated_report['management_code'],
             created_at=updated_report['created_at'],
-            updated_at=updated_report['updated_at']
+            updated_at=updated_report['updated_at'],
+            flag_count=updated_report.get('flag_count', 0)
         )
 
     except HTTPException:
@@ -702,6 +699,7 @@ async def delete_report(report_id: str, management_code: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting report: {str(e)}")
+
 
 # Marking a report as completed
 @app.patch("/reports/{report_id}/status", response_model=Reports)
