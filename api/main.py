@@ -8,6 +8,7 @@ import uuid
 from typing import List, Optional
 from datetime import datetime
 from urllib.parse import urlparse
+from mangum import Mangum
 
 # Initializing FastAPI
 app = FastAPI(title="PUPSeek", version="1.0.0", description="API for managing reports and info")
@@ -26,9 +27,10 @@ DYNAMODB_REPORTS_TABLE = os.getenv("DYNAMODB_REPORTS_TABLE", "pitech-reports")
 DYNAMODB_RESPONSES_TABLE = os.getenv("DYNAMODB_RESPONSES_TABLE", "pitech-responses")
 DYNAMODB_FLAGS_TABLE = os.getenv("DYNAMODB_FLAGS_TABLE", "pitech-flags")
 S3_BUCKET = os.getenv("S3_BUCKET", "pitech-uploads-2025")
+region = os.getenv("AWS_REGION", "ap-northeast-1")
 
 # Initializing AWS Resources
-dynamodb = boto3.resource('dynamodb')
+dynamodb = boto3.resource('dynamodb', region_name=region)
 s3_client = boto3.client('s3')
 
 reports_table = dynamodb.Table(DYNAMODB_REPORTS_TABLE) 
@@ -757,6 +759,8 @@ async def mark_completed(report_id: str, management_code: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error marking report as completed: {str(e)}")
 
+# Handler for AWS Lambda
+handler = Mangum(app)
 
 if __name__ == "__main__":
     import uvicorn
