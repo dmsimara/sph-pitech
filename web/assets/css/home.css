@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-main: 'Poppins', sans-serif;
+
+  --color-primary: #44001E;
+  --color-secondary: #660F24;
+  --color-accent: #F24455;
+  --color-bg: #FEFAEF;
+
+  --max-width: 1200px;
+  --radius: 0.5rem;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--color-bg);
+}
+
+.title h1 {
+  color: var(--color-secondary);
+  font-family: var(--font-main);
+  font-size: 3rem;
+  text-align: left;
+  padding-left: 3rem;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.sections {
+  display: flex;
+  justify-content: center;  
+  gap: 2rem;               
+  padding: 2rem 3rem;
+  max-width: var(--max-width);
+  margin: 1rem auto;
+}
+
+.class-directory,
+.lost-found {
+  flex: 1;
+  max-width: 40%; 
+  height: 400px;   
+  background: linear-gradient(to bottom left, var(--color-accent), var(--color-secondary));
+  padding: 2rem;
+  border-radius: 1.5rem;
+  color: white;
+  font-family: var(--font-main);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.class-directory h3,
+.lost-found h3 {
+  font-size: 2rem;
+  margin-bottom: 0.1rem;
+  line-height: 1.1;
+}
+
+.class-directory p,
+.lost-found p {
+  font-size: 1rem;
+  margin-bottom: 0;
+  margin-top: -7rem; 
+}
+
+.class-directory a,
+.lost-found a {
+  align-self: flex-end; 
+}
+
+.class-directory a img,
+.lost-found a img {
+  width: 40px;
+  height: auto;
+}

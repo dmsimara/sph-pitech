@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PUPSeek</title>
+  <link rel="icon" type="image/x-icon" href="/web/assets/img/PUPSEEK1.png" />
+  <link rel="stylesheet" href="/web/assets/css/base.css" />
+  <link rel="stylesheet" href="/web/assets/css/directory.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="layout">
+    <div id="sidebar-container"></div>
+
+    <main class="main-content">
+      <div class="directory-header">
+        <h1>Class Directory</h1>
+      </div>
+
+      <!-- college selection -->
+      <div class="directory-selection">
+        <h2>Select College</h2>
+        <select name="college" id="college-dropdown">
+          <option value="">College</option>
+        </select>
+      </div>
+
+      <!-- program selection -->
+      <div class="directory-selection">
+        <h2>Select Program</h2>
+        <select id="program-dropdown" disabled>
+            <option value="">Program</option>
+        </select>
+      </div>
+
+      <!-- year level selection -->
+      <div class="directory-selection">
+        <h2>Select Year Level</h2>
+        <select id="year-dropdown" disabled>
+            <option value="">Year Level</option>
+        </select>
+      </div>
+
+      <div class="proceed-container">
+        <button class="proceed-btn">Proceed</button>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module" src="/web/assets/js/directory.js"></script>
+</body>
+</html>
