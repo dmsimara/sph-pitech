@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import boto3
@@ -376,35 +376,26 @@ async def get_all_reports():
     
     try:
         response = reports_table.scan()
+        raw_items = response.get("Items", [])
 
-        reports = []
-        for item in response.get('Items', []):
-            photo_urls = []
-            if item.get('photo_urls'):
-                photo_urls = item['photo_urls']
-            elif item.get('photo'):
-                # Fallback
-                photo_urls = generate_presigned_url(item['photo'])
-            
-            # Build the report object
-            report = Reports(
-                report_id=item['report_id'],
-                type=item['type'],
-                item_name=item['item_name'],
-                description=item['description'],
-                contact_info=item['contact_info'],
-                status=item['status'],
-                photo=item.get('photo', []),
-                photo_urls=photo_urls,
-                is_surrendered=item.get('is_surrendered', False),
-                management_code=item['management_code'],   
-                created_at=item['created_at'],
-                updated_at=item['updated_at']
-            )
-            reports.append(report)
+        clean_items = []
+        for item in raw_items:
+            item["photo"] = item.get("photo") or []
+            item["photo_urls"] = item.get("photo_urls") or []
+            item["flag_count"] = item.get("flag_count") or 0
 
-        return reports
-    
+            if isinstance(item["photo"], str):
+                item["photo"] = [item["photo"]]
+            if isinstance(item["photo_urls"], str):
+                item["photo_urls"] = [item["photo_urls"]]
+
+            try:
+                clean_items.append(Reports(**item))
+            except ValidationError as e:
+                print(f"Skipping invalid report: {e}")
+
+        return clean_items
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching reports: {str(e)}")
 

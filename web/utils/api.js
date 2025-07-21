@@ -28,3 +28,91 @@ export async function getRepresentative(sectionId) {
   if (!res.ok) throw new Error('Failed to fetch representative');
   return await res.json();
 }
+
+export async function getAllReports() {
+  const config = await loadConfig();
+  const baseUrl = config.API_BASE_URL;
+
+  const response = await fetch(`${baseUrl}/reports`);
+  if (!response.ok) throw new Error('Failed to fetch reports');
+
+  let data;
+  try {
+    data = await response.json();
+  } catch (err) {
+    console.error("Failed to parse JSON from /reports:", err);
+    throw new Error('Invalid JSON response from server');
+  }
+
+  // Sanitize data: return only well-formed reports
+  const safeReports = Array.isArray(data) ? data.filter(report => {
+    const isValid =
+      report.report_id &&
+      report.type &&
+      report.item_name &&
+      typeof report.description === 'string' &&
+      report.contact_info &&
+      report.status &&
+      typeof report.is_surrendered === 'boolean' &&
+      typeof report.management_code === 'string' &&
+      report.created_at &&
+      report.updated_at;
+
+    if (!isValid) console.warn("Skipping malformed report:", report);
+    return isValid;
+  }) : [];
+
+  return safeReports;
+}
+
+
+export async function submitReport(reportData) {
+  const baseUrl = config.API_BASE_URL;
+  console.log('Base URL:', baseUrl);
+
+  const validData = {
+    type: reportData.type,
+    item_name: reportData.item_name,
+    description: reportData.description,
+    contact_info: reportData.contact_info,
+    is_surrendered: reportData.is_surrendered,
+    management_code: reportData.management_code
+  };
+
+  const response = await fetch(`${baseUrl}/reports`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(validData)
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error("Error response from API:", errorData);
+    throw new Error(errorData.detail?.[0]?.msg || 'Failed to submit report.');
+  }
+
+  return await response.json();
+}
+
+
+
+export async function uploadPhoto(reportId, file) {
+  const config = await loadConfig();
+  const baseUrl = config.API_BASE_URL;
+  const formData = new FormData();
+  formData.append("photo", file);
+
+  const res = await fetch(`${baseUrl}/reports/${reportId}/upload_photo`, {
+    method: "POST",
+    body: formData
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || "Failed to upload photo.");
+  }
+
+  return await res.json(); // { message, photo_url }
+}
