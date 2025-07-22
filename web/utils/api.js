@@ -44,7 +44,6 @@ export async function getAllReports() {
     throw new Error('Invalid JSON response from server');
   }
 
-  // Sanitize data: return only well-formed reports
   const safeReports = Array.isArray(data) ? data.filter(report => {
     const isValid =
       report.report_id &&
@@ -64,7 +63,6 @@ export async function getAllReports() {
 
   return safeReports;
 }
-
 
 export async function submitReport(reportData) {
   const baseUrl = config.API_BASE_URL;
@@ -176,4 +174,58 @@ export async function updateReport(reportId, reportUpdate, managementCode) {
   }
 
   return await response.json();
+}
+
+export async function deleteReport(reportId, managementCode) {
+  const config = await loadConfig();
+  const baseUrl = config.API_BASE_URL;
+
+  const response = await fetch(
+    `${baseUrl}/reports/${reportId}?management_code=${encodeURIComponent(managementCode)}`,
+    {
+      method: 'DELETE',
+    }
+  );
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.detail || "Failed to delete report.");
+  }
+
+  return await response.json(); 
+}
+
+export async function markReportAsCompleted(reportId, managementCode) {
+  const config = await loadConfig();
+  const baseUrl = config.API_BASE_URL;
+
+  const url = new URL(`${baseUrl}/reports/${reportId}/status`);
+  if (managementCode) url.searchParams.append('management_code', managementCode);
+
+  const response = await fetch(url.toString(), {
+    method: 'PATCH'
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.detail || 'Failed to mark report as completed');
+  }
+
+  return await response.json();
+}
+
+export async function getReportResponses(reportId, managementCode) {
+  const config = await loadConfig();
+  const baseUrl = config.API_BASE_URL;
+
+  const url = new URL(`${baseUrl}/reports/${reportId}/responses`);
+  url.searchParams.append('management_code', managementCode);
+
+  const res = await fetch(url);
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || 'Failed to fetch report responses');
+  }
+
+  return await res.json();  
 }

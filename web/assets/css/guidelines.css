@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-main: 'Poppins', sans-serif;
+
+  --color-primary: #44001E;
+  --color-secondary: #660F24;
+  --color-accent: #F24455;
+  --color-bg: #FEFAEF;
+
+  --max-width: 1200px;
+  --radius: 0.5rem;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--color-bg);
+  margin: 0;
+  height: 100vh;
+  overflow: hidden; 
+}
+
+.layout {
+  display: flex;
+  height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
+  color: var(--color-secondary);
+  background-color: var(--color-bg);
+}
+
+.directory-header {
+  padding-left: 1.5rem;
+  margin-top: 1rem;
+}
+
+.directory-header h1 {
+  font-size: 3rem;
+  color: var(--color-secondary);
+  margin-bottom: 2rem;
+  margin-left: 2.5rem;
+}
+
+.directory-selection h2 {
+  font-weight: normal;
+  color: var(--color-secondary);
+  margin-bottom: 0.5rem;
+  padding-left: 5rem;
+  font-size: 1.2rem;
+}
+
+.directory-header p {
+  font-size: 1.2rem;
+  color: var(--color-secondary);
+  margin-top: -1rem;
+  margin-left: 0.5rem;
+  font-weight: 500;
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background-color: var(--color-secondary);
+  color: white;
+  text-decoration: none;
+  margin-bottom: 1rem;
+  transition: background 0.2s;
+}
+
+
+.back-button:hover {
+  background-color: var(--color-accent);
+}
+
+main h3 {
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-secondary);
+}
+
+main ul {
+  padding-left: 2rem;
+  margin-bottom: 1rem;
+}
+
+
+main li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+  color: var(--color-secondary);
+}
+
+
+main p {
+  margin-bottom: 1rem;
+  line-height: 1.8;
+  color: var(--color-secondary);
+}
+
+.guidelines-content {
+  padding: 0.5rem 2rem;
+  color: var(--color-secondary);
+  max-width: 950px;
+  margin: 0 auto;
+  text-align: justify;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-secondary); 
+  border-radius: 5px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-secondary) #f1f1f1;
+}

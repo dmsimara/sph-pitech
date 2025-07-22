@@ -24,15 +24,18 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const currentPath = window.location.pathname;
-        const links = document.querySelectorAll('.nav-links a');
+      const currentPath = window.location.pathname;  
+      const links = document.querySelectorAll('.nav-links a');
 
-        links.forEach(link => {
-        if (link.href.includes(currentPath)) {
-            link.classList.add('active');
+      links.forEach(link => {
+        const linkPath = new URL(link.href).pathname;  
+
+        if (linkPath === currentPath) {
+          link.classList.add('active');
         }
-        });
+      });
     });
   </script>
+
 </body>
 </html>

@@ -19,17 +19,24 @@
 }
 
 body {
-    font-family: var(--font-main);
-    background-color: var(--color-bg);
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
+  font-family: var(--font-main);
+  background-color: var(--color-bg);
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;  
 }
 
-#main-content {
-  overflow-y: auto;
-  height: 100vh;  
+.layout {
+  display: flex;
+  height: 100vh;
+}
+
+.main-content {
+  overflow-y: hidden;  /* prevents body scroll */
+  height: 100vh;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .directory-header {
@@ -107,15 +114,36 @@ body {
   color: white;
 }
 
-#reports-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));  
-  gap: 20px;
+.reports-container::-webkit-scrollbar {
+  width: 10px; 
+}
+
+.reports-container::-webkit-scrollbar-track {
+  background: transparent;   
+}
+
+.reports-container::-webkit-scrollbar-thumb {
+  background-color: var(--color-secondary);  
+  border-radius: 10px;
+  border: 2px solid transparent;  
+  background-clip: content-box;
+}
+
+.reports-container::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-primary);  
+}
+
+
+.reports-container {
+  flex: 1;  
+  overflow-y: auto;
   padding: 20px;
-  max-height: 100vh;
-  overflow-y: auto;  
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
   box-sizing: border-box;
-  margin-top: -1rem;
+  min-height: 0; 
+  align-items: stretch; 
 }
 
 .report-card {
@@ -125,7 +153,8 @@ body {
   overflow: hidden;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   padding: 10px;
-  max-height: 400px;   
+  min-height: 400px;   
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -145,8 +174,9 @@ body {
   border-radius: 6px;
   overflow: hidden;
   width: 80%;
-  height: 160px;
+  height: 200px;
   margin: 0 auto;   
+  margin-bottom: 10px;
 }
 
 .report-photo img {
@@ -171,7 +201,7 @@ body {
 }
 
 .report-info {
-  padding: 8px 10px;
+  padding: 4px 10px;
 }
 
 .report-info p {
