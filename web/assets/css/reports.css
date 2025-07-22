@@ -252,3 +252,194 @@ body {
   font-size: 20px;
   cursor: pointer;
 }
+
+
+
+
+
+
+.code-modal-content {
+  position: relative;
+  background-color: #fff;
+  padding: 32px 28px;
+  border-radius: 12px;
+  width: 500px; /* WIDER */
+  max-width: 90%;
+  max-height: 85vh; /* REDUCED HEIGHT */
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  animation: fadeInScale 0.3s ease-in-out;
+}
+
+.code-modal-image {
+  width: 110px; /* BIGGER */
+  margin: 0 auto 20px;
+  display: block;
+}
+
+.close-code-modal {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-size: 22px;
+  color: var(--color-secondary);
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#code-modal-title {
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin-top: -1rem;
+  margin-bottom: 8px;
+  color: var(--color-secondary);
+}
+
+.code-modal-text {
+  font-size: 0.8rem;
+  color: var(--color-secondary);
+  margin-bottom: 20px;
+}
+
+.input-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.code-input {
+  text-align: center;
+  padding: 10px 14px;
+  width: 60%; 
+  font-size: 1.2rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+  background-color: #5A5A5A1A;
+}
+
+.code-modal-buttons {
+  display: flex;
+  justify-content: center;
+}
+
+.confirm-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  background-color: var(--color-secondary);
+  color: white;
+}
+
+.code-error-msg {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 12px;
+}
+
+
+#edit-report-modal.custom-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+#edit-report-modal .modal-content {
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 550px;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: fadeInModal 0.3s ease-in-out;
+}
+
+#edit-report-modal h2 {
+  text-align: center;
+  font-weight: bold;
+  color: var(--color-secondary);
+  margin-bottom: 16px;
+}
+
+#edit-report-modal .close-modal {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 1.8rem;
+  color: var(--color-secondary);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+#edit-report-modal .close-modal:hover {
+  transform: scale(1.2);
+}
+
+#edit-report-form {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+#edit-report-form .form-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+#edit-report-form label {
+  width: 150px;
+  color: var(--color-secondary);
+  font-weight: 600;
+}
+
+#edit-report-form input[type="text"],
+#edit-report-form input[type="file"] {
+  flex: 1;
+  padding: 8px 10px;
+  background-color: #5A5A5A1A;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+#edit-report-form input[type="file"] {
+  padding: 6px;
+}
+
+#edit-report-form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+#edit-report-form .save-btn {
+  background-color: var(--color-secondary);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  margin-top: -1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#edit-report-form .save-btn:hover {
+  opacity: 0.7;
+}

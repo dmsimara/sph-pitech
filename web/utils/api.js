@@ -154,3 +154,26 @@ export async function submitResponse(reportId, responseData) {
 
   return await res.json();
 }
+
+export async function updateReport(reportId, reportUpdate, managementCode) {
+  const config = await loadConfig();
+  const baseUrl = config.API_BASE_URL;
+
+  const response = await fetch(
+    `${baseUrl}/reports/${reportId}?management_code=${encodeURIComponent(managementCode)}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(reportUpdate),
+    }
+  );
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.detail || "Failed to update report.");
+  }
+
+  return await response.json();
+}

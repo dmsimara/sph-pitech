@@ -73,6 +73,8 @@ document.addEventListener("DOMContentLoaded", async () => {
      renderMessage("No records found.");
    } else {
       renderReportsFromData(filtered);
+      setupFlagModalListeners();
+      setupReportActionModalListeners();
    }
   });
 
@@ -108,12 +110,20 @@ function setupModalListeners() {
 
   openBtn.addEventListener('click', () => {
     modal.style.display = 'flex';
-    const lostRadio = document.querySelector('input[name="report-type"][value="lost"]');
-    if (lostRadio) {
-      lostRadio.checked = true;
-      lostRadio.dispatchEvent(new Event('change'));
+
+    const selectedRadio = document.querySelector('input[name="report-type"]:checked');
+    if (selectedRadio) {
+      selectedRadio.dispatchEvent(new Event('change'));
+    } else {
+      // Default to lost if no option is preselected
+      const lostRadio = document.querySelector('input[name="report-type"][value="lost"]');
+      if (lostRadio) {
+        lostRadio.checked = true;
+        lostRadio.dispatchEvent(new Event('change'));
+      }
     }
   });
+
 
   closeBtn.addEventListener('click', () => {
     modal.style.display = 'none';
@@ -193,6 +203,8 @@ function setupModalListeners() {
   });
 }
 
+
+
 function setupFlagSubmission() {
   const submitBtn = document.getElementById("submit-flag-btn");
   const flagModal = document.getElementById("flag-modal");
@@ -233,28 +245,27 @@ function setupFlagSubmission() {
 document.getElementById('submit-report').addEventListener('click', async (e) => {
   e.preventDefault();
 
-  const selectedType = document.querySelector('input[name="report-type"]:checked');
-  if (selectedType) {
-    selectedType.dispatchEvent(new Event('change'));
-  }
+  const form = e.target.closest('form');
+  if (!form) return alert("Form not found!");
 
-  document.getElementById("code-mismatch-msg").style.display = "none";
+  const type = form.querySelector('input[name="report-type"]:checked')?.value;
+  const itemName = form.querySelector("#item-name")?.value.trim();
+  const contactInfo = form.querySelector("#contact-input")?.value.trim();
+  const isSurrendered = form.querySelector("#is-surrendered")?.checked;
 
-  const type = document.querySelector('input[name="report-type"]:checked')?.value;
-  const itemName = document.getElementById("item-name")?.value.trim();
-  const contactInfo = document.getElementById("contact-input")?.value.trim();
-  const isSurrendered = document.getElementById("is-surrendered")?.checked || false;
+  const description = form.querySelector("#description")?.value.trim();
+  const code = form.querySelector("#management-code")?.value.trim();
+  const confirmCode = form.querySelector("#confirm-management-code")?.value.trim();
 
-  const description = document.getElementById("description")?.value.trim();
-  const code = document.getElementById("management-code")?.value.trim();
-  const confirmCode = document.getElementById("confirm-management-code")?.value.trim();
+  const foundCode = form.querySelector("#found-code")?.value.trim();
+  const foundConfirmCode = form.querySelector("#found-confirm-code")?.value.trim();
 
-  const foundCode = document.getElementById("found-code")?.value.trim();
-  const foundConfirmCode = document.getElementById("found-confirm-code")?.value.trim();
+  console.log("type:", type);
+  console.log("isSurrendered:", isSurrendered);
+  console.log("foundCode:", `"${foundCode}"`);
+  console.log("foundConfirmCode:", `"${foundConfirmCode}"`);
 
-  const photoInput = document.getElementById("report-photo");
-  const photoFile = photoInput?.files?.[0];
-
+  // VALIDATIONS
   if (!type || !itemName || !contactInfo) {
     alert("Please fill in all required fields.");
     return;
@@ -271,7 +282,7 @@ document.getElementById('submit-report').addEventListener('click', async (e) => 
     }
     if (code !== confirmCode) {
       alert("Codes do not match.");
-      document.getElementById("code-mismatch-msg").style.display = "block";
+      form.querySelector("#code-mismatch-msg").style.display = "block";
       return;
     }
   }
@@ -287,10 +298,13 @@ document.getElementById('submit-report').addEventListener('click', async (e) => 
     }
     if (foundCode !== foundConfirmCode) {
       alert("Codes do not match.");
-      document.getElementById("code-mismatch-msg").style.display = "block";
+      form.querySelector("#code-mismatch-msg").style.display = "block";
       return;
     }
   }
+
+  const photoInput = form.querySelector("#report-photo");
+  const photoFile = photoInput?.files?.[0];
 
   const formData = {
     type,
@@ -320,13 +334,13 @@ document.getElementById('submit-report').addEventListener('click', async (e) => 
 
     if (type === "lost") {
       confirmationMessage.textContent = "You reported a lost item.";
-      confirmationDetails.textContent = "If someone finds your item, their contact info and description will appear here. Reach out directly to them and update the status once recovered.";
+      confirmationDetails.textContent = "If someone finds your item, their contact info and description will appear here.";
     } else if (type === "found" && isSurrendered) {
       confirmationMessage.textContent = "Got it!";
-      confirmationDetails.textContent = "We’ve marked this report as completed since it’s been handed over to the PUP Lost & Found area.";
+      confirmationDetails.textContent = "We’ve marked this report as completed since it’s been handed over to the PUP Guardhouse.";
     } else {
       confirmationMessage.textContent = "You reported a found item.";
-      confirmationDetails.textContent = "You'll see claim requests here from users who think it's theirs. Please verify carefully before marking the item as claimed.";
+      confirmationDetails.textContent = "You'll see claim requests here from users who think it's theirs.";
     }
 
     confirmationModal.style.display = 'flex';

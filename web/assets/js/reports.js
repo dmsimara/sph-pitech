@@ -1,4 +1,4 @@
-import { getAllReports } from '../../utils/api.js';
+import { getAllReports, updateReport } from '../../utils/api.js';
 
 async function loadReportDetails() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -115,6 +115,103 @@ window.addEventListener('click', (e) => {
   }
 });
 
+function setupEditIconListeners() {
+  document.querySelectorAll(".edit-icon").forEach(icon => {
+    icon.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const reportId = urlParams.get("report_id");
+
+      if (!reportId) {
+        console.error("No report_id found in URL.");
+        return;
+      }
+
+      const codeModal = document.getElementById("code-modal");
+      codeModal.setAttribute("data-mode", "edit");
+      codeModal.setAttribute("data-report-id", reportId);
+
+      document.getElementById("code-input").value = "";
+      document.getElementById("code-error").style.display = "none";
+      codeModal.style.display = "flex";
+    });
+  });
+
+  document.getElementById("confirm-code-btn").addEventListener("click", async () => {
+    const codeEntered = document.getElementById("code-input").value.trim();
+    const reportId = document.getElementById("code-modal").getAttribute("data-report-id");
+
+    if (!reportId || codeEntered.length !== 6) {
+      document.getElementById("code-error").style.display = "block";
+      return;
+    }
+
+    try {
+      await updateReport(reportId, {}, codeEntered); 
+
+      const reports = await getAllReports();
+      const report = reports.find(r => r.report_id === reportId);
+      if (!report) {
+        console.error("Report not found.");
+        return;
+      }
+
+      document.getElementById("edit-item-name").value = report.item_name || '';
+      document.getElementById("edit-contact-info").value = report.contact_info || '';
+      document.getElementById("edit-description").value = report.description || '';
+
+      document.getElementById("code-error").style.display = "none";
+      document.getElementById("code-modal").style.display = "none";
+      document.getElementById("edit-report-modal").style.display = "flex";
+
+    } catch (err) {
+      console.error("Verification failed:", err);
+      document.getElementById("code-error").style.display = "block";
+    }
+  });
+
+  window.addEventListener("click", (e) => {
+    const modal = document.getElementById("code-modal");
+    if (e.target === modal) {
+      modal.style.display = "none";
+    }
+  });
+
+  document.querySelector(".close-code-modal").addEventListener("click", () => {
+    document.getElementById("code-modal").style.display = "none";
+  });
+}
+
+document.getElementById("edit-report-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const reportId = document.getElementById("code-modal").getAttribute("data-report-id");
+  const managementCode = document.getElementById("code-input").value.trim();
+
+  if (!reportId || !managementCode) {
+    alert("Missing report ID or code.");
+    return;
+  }
+
+  const updatedData = {
+    item_name: document.getElementById("edit-item-name").value.trim(),
+    contact_info: document.getElementById("edit-contact-info").value.trim(),
+    description: document.getElementById("edit-description").value.trim()
+  };
+
+  try {
+    await updateReport(reportId, updatedData, managementCode);
+
+    alert("Report updated successfully.");
+    document.getElementById("edit-report-modal").style.display = "none";
+    window.location.reload();
+  } catch (err) {
+    alert(`Failed to update: ${err.message}`);
+  }
+});
+
+
 function getStatusLabel(report) {
   const { type, status, is_surrendered } = report;
 
@@ -126,7 +223,6 @@ function getStatusLabel(report) {
 
   return { text: status, class: 'status-default' };  
 }
-
 
 function formatStatus(report) {
   if (report.status === 'completed') {
@@ -148,5 +244,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.location.href = `/web/lost-found.html?filter=${filter}`;
   });
 
-  loadReportDetails();
+  await loadReportDetails(); 
+  setupEditIconListeners();
 });

@@ -37,6 +37,62 @@
             </div>
         </div>
 
+        <!-- Code Confirmation Modal -->
+        <div id="code-modal" class="custom-modal">
+            <div class="code-modal-content">
+                <span class="close-code-modal">&times;</span> <!-- NEW close button -->
+
+                <img src="/web/assets/img/PASSKEY.png" alt="Passkey" class="code-modal-image" />
+
+                <h2 id="code-modal-title">Enter Management Code</h2>
+                <p class="code-modal-text">Please enter the 6-digit passcode associated with this report.</p>
+
+                <div class="input-wrapper">
+                    <input type="password" id="code-input" class="code-input" maxlength="6" />
+                </div>
+                <p id="code-error" class="code-error-msg" style="display:none;">Invalid or missing code.</p>
+
+                <div class="code-modal-buttons">
+                    <button id="confirm-code-btn" class="confirm-btn">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Report Modal -->
+        <div id="edit-report-modal" class="custom-modal">
+            <div class="modal-content">
+                <span class="close-modal" data-close="edit-report-modal">&times;</span>
+                <h2>Edit Report</h2>
+                
+                <form id="edit-report-form">
+                    <div class="form-row">
+                        <label for="edit-item-name">Item Name:</label>
+                        <input type="text" id="edit-item-name" name="item_name" />
+                    </div>
+
+                    <div class="form-row">
+                        <label for="edit-photo">Photo:</label>
+                        <input type="file" id="edit-photo" name="photo" />
+                    </div>
+
+                    <div class="form-row">
+                        <label for="edit-contact-info">Contact Info:</label>
+                        <input type="text" id="edit-contact-info" name="contact_info" />
+                    </div>
+
+                    <div class="form-row">
+                        <label for="edit-description">Description:</label>
+                        <input type="text" id="edit-description" name="description" maxlength="20" />
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="save-btn">Save Changes</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
         <!-- Modal 1 -->
         <div id="modal-1" class="custom-modal">
             <div class="modal-content">

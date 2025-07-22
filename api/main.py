@@ -207,23 +207,21 @@ async def upload_photo(report_id: str, photo: UploadFile = File(...)):
         if not report:
             raise HTTPException(status_code=404, detail="Report not found")
 
+        # Delete old photos from S3 if they exist
         old_urls = report.get("photo_urls", [])
-
-        # Delete old photos
         for url in old_urls:
             if url.startswith("https://"):
                 key = url.split(".amazonaws.com/")[-1]
             elif url.startswith("s3://"):
                 key = url.replace(f"s3://{S3_BUCKET}/", "")
             else:
-                continue  
+                continue
 
             try:
                 s3_client.delete_object(Bucket=S3_BUCKET, Key=key)
             except Exception as e:
-                print(f"Failed to delete old image: {e}")  
+                print(f"Failed to delete old image: {e}")
 
-        # Upload new photo
         contents = await photo.read()
         photo_key = f"reports/{report_id}/{uuid.uuid4()}.jpg"
 
@@ -236,13 +234,12 @@ async def upload_photo(report_id: str, photo: UploadFile = File(...)):
 
         new_url = f"https://{S3_BUCKET}.s3.amazonaws.com/{photo_key}"
 
-        # Update Reports table
         reports_table.update_item(
             Key={"report_id": report_id},
-            UpdateExpression="SET photo_urls = :urls, photo = :single, updated_at = :updated",
+            UpdateExpression="SET photo_urls = :urls, photo = :photo_list, updated_at = :updated",
             ExpressionAttributeValues={
                 ":urls": [new_url],
-                ":single": new_url,
+                ":photo_list": [new_url], 
                 ":updated": datetime.utcnow().isoformat()
             }
         )
@@ -292,6 +289,18 @@ async def submit_response(report_id: str, response: ResponseCreate):
         raise HTTPException(status_code=500, detail=f"Error saving response: {str(e)}")
     
     return response_item
+
+# Validate the management code
+@app.get("/reports/{report_id}/verify")
+async def verify_code(report_id: str, management_code: str):
+    report = reports_table.get_item(Key={'report_id': report_id}).get('Item')
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    if not bcrypt.checkpw(management_code.encode('utf-8'), report['management_code'].encode('utf-8')):
+        raise HTTPException(status_code=403, detail="Invalid management code")
+
+    return { "verified": True }
 
 # Create a flag report
 @app.post("/reports/{report_id}/flags", response_model=Flags)

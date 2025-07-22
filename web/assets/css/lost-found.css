@@ -272,15 +272,16 @@ body {
   text-align: center;
   font-style: italic;
   color: gray;
-  margin-top: 3rem;
   font-size: 1.1rem;
 }
 
 .no-records-wrapper {
+  grid-column: 1 / -1; 
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 200px;
+  min-height: 60vh; 
+  width: 100%;
 }
 
 .report-button {
