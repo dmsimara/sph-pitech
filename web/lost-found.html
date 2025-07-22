@@ -18,7 +18,7 @@
         <h1>Lost & Found</h1>
         <div class="search-bar">
             <i class="fas fa-search"></i>
-            <input type="text" placeholder="Search Lost and Found" />
+            <input id="search-input" type="text" placeholder="Search Lost and Found" />
         </div>
       </div>
 
@@ -67,7 +67,7 @@
 
                     <div class="form-row" id="description-row" style="display: none;">
                         <label class="form-label" for="description">Description:</label>
-                        <input type="text" id="description" name="description" maxlength="10" class="form-input" />
+                        <input type="text" id="description" name="description" maxlength="20" class="form-input" />
                     </div>
 
                     <div class="form-row" id="code-row" style="display: none;">
@@ -84,7 +84,6 @@
                         <p><em>Save this code— you'll need it to update or manage your report.</em></p>
                     </div>
 
-                    <p id="code-mismatch-msg" style="display: none; color: red; font-size: 0.9rem; margin-left: 130px;">Codes do not match.</p>
 
                     <!-- FOUND UNIQUE INPUTS -->
 
@@ -116,6 +115,8 @@
                         </div>
                     </div>
 
+                    <p id="code-mismatch-msg" style="display: none; color: red; font-size: 0.9rem; margin-left: 130px; margin-top: 12px; margin-bottom: -1rem;">Codes do not match.</p>
+
                     <div id="form-content-placeholder" class="form-placeholder"></div>
 
                     <div class="form-row submit-container">
@@ -137,6 +138,80 @@
 
       <!-- Reports will go here -->
       <div id="reports-container" class="reports-container"></div>
+
+      <!-- Flag Report Modal -->
+       <div id="flag-modal" class="modal">
+            <div class="modal-content">
+             <span class="close close-flag-modal">&times;</span>
+             <h2 class="flag-title">Report this Post</h2>
+             <p class="flag-subtitle">Why do you want to report this review?</p>
+             <p class="flag-guidance">
+                Please refer to our 
+                <a href="guidelines.html" class="guideline-link" target="_blank">Community Guidelines</a> 
+                for guidance.
+             </p>
+             <select id="report-reason" class="reason-dropdown">
+                 <option value="" disabled selected>Choose a reason</option>
+                 <option value="irrelevant">Irrelevant Report</option>
+                 <option value="inappropriate">Inappropriate Content</option>
+                 <option value="spam">Spam or Scam</option>
+                 <option value="duplicate">Duplicate Report</option>
+                 <option value="false-info">Incorrect Information</option>
+             </select>
+             <button id="submit-flag-btn" class="flag-submit-btn">Report</button>
+           </div>
+       </div>
+
+       <!-- Flag Report Confirmation Modal -->
+        <div id="flag-confirmation-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-confirmation">&times;</span>
+                <h2 class="confirm-title">Report this Post</h2>
+                <p><strong>Thank you for your concern.</strong></p>
+                <p>Your report has been received and will help us keep PUPSeek a safe and trustworthy space.</p>
+            </div>
+        </div>
+
+        <!-- Action Modal -->
+        <div id="action-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-action-modal">&times;</span>
+                <h2 id="action-modal-title" class="modal-title color-secondary">Action Form</h2>
+
+                <form id="action-form">
+                    <div class="form-row">
+                        <label for="response-name">Full Name:</label>
+                        <input type="text" id="response-name" name="response-name"required />
+                    </div>
+
+                    <div class="form-row">
+                        <label for="response-contact">Contact Info:</label>
+                        <input type="text" id="response-contact" name="response-contact" required />
+                    </div>
+
+                    <div class="form-row">
+                        <label for="response-message">Message or Description:</label>
+                        <textarea id="response-message" name="response-message" maxlength="20" required></textarea>
+                    </div>
+
+                    <div class="form-submit-row">
+                        <button type="button" id="submit-action-btn" class="submit-action-btn color-secondary">Submit</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+        <!-- Response Confirmation Modal -->
+        <div class="modal" id="response-confirmation-modal" style="display: none;">
+            <div class="modal-content confirmation-modal-content">
+                <img src="/web/assets/img/CONFIRMATION.png" alt="Confirmation" class="confirmation-image" />
+                <h1 id="response-confirmation-message" class="confirmation-heading"></h1>
+                <p id="response-confirmation-details" class="confirmation-details"></p>
+                <button id="response-ok-btn" class="confirm-ok-btn">Okay</button>
+            </div>
+        </div>
+
 
     </main>
   </div>

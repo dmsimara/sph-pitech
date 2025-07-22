@@ -1,0 +1,254 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-main: 'Poppins', sans-serif;
+
+  --color-primary: #44001E;
+  --color-secondary: #660F24;
+  --color-accent: #F24455;
+  --color-bg: #FEFAEF;
+
+  --max-width: 1200px;
+  --radius: 0.5rem;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--color-bg);
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
+#main-content {
+  overflow-y: auto;
+  height: 100vh;  
+  padding: 30px;
+}
+
+.directory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+}
+
+.directory-header h1 {
+  font-size: 3rem;
+  color: var(--color-secondary);
+  margin-bottom: 2rem;
+  margin-top: 0.5rem;
+}
+
+.back-button i {
+  color: white;
+  font-size: 0.85rem;
+}
+
+.back-button {
+  background-color: var(--color-secondary);
+  border-radius: 50%;
+  border-width: 2px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-left: -1.6rem;
+}
+
+.back-button:hover {
+  background-color: var(--color-accent);
+}
+
+.report-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: -1rem;
+}
+
+.report-actions i {
+  color: var(--color-secondary);
+  cursor: pointer;
+  font-size: 1.3rem;
+  transition: color 0.2s ease;
+}
+
+.report-actions i:hover {
+  color: var(--color-accent);
+}
+
+.report-info {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 40px;
+  margin-top: -3rem;
+}
+
+.report-photo {
+  flex: 1 1 300px;
+  max-width: 300px;
+  height: auto;
+  border: 1px solid var(--color-secondary);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.report-photo img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  display: block;
+}
+
+.info-details {
+  flex: 2 1 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 1rem;
+  margin-top: 2.5rem;
+  margin-left: 2rem;
+}
+
+.info-details p {
+  margin: 0;
+  line-height: 1.4;
+  color: var(--color-secondary);
+  font-size: 19px;
+}
+
+.info-details strong {
+  font-weight: 600;
+}
+
+.info-details .description-box,
+.info-details .info-note {
+  background: #f0f0f0;
+  padding: 12px 20px;
+  border-radius: 6px;
+  margin-top: 4px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.info-details .info-note i {
+  color: var(--color-secondary);
+  margin-right: 6px;
+}
+
+.info-box {
+  background: #f0f0f0;
+  padding: 25px 20px;
+  border-radius: 6px;
+  margin-top: 12px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.lost-type .info-box {
+  color: var(--color-secondary);
+  font-weight: bold;
+}
+
+.found-type .info-box {
+  color: var(--color-secondary);
+  font-style: italic;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-top: 6px;
+}
+
+.status-orange {
+  background-color: #E16900;
+}
+
+.status-green {
+  background-color: #00CB07;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.action-buttons button {
+  padding: 15px 30px;
+  min-width: 450px;
+  max-width: 500px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.action-buttons button:hover {
+  opacity: 0.8;
+}
+
+.btn-outline-secondary {
+  background-color: #E9DCD0;
+  border: 2px solid var(--color-secondary);
+  color: var(--color-secondary);
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-filled-secondary {
+  background-color: var(--color-secondary);
+  color: white;
+  font-weight: bold;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Modal styles */
+.custom-modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px 30px;
+  border-radius: 8px;
+  min-width: 300px;
+  position: relative;
+}
+
+.close-modal {
+  position: absolute;
+  top: 10px; right: 15px;
+  font-size: 20px;
+  cursor: pointer;
+}

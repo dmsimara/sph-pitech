@@ -1,6 +1,7 @@
-import { getAllReports, submitReport, uploadPhoto } from '../../utils/api.js';
+import { getAllReports, submitReport, uploadPhoto, submitFlag, submitResponse } from '../../utils/api.js';
 
 let allReports = [];
+let currentFilter = "all";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const sidebarRes = await fetch('/web/components/base.html');
@@ -14,9 +15,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  const params = new URLSearchParams(window.location.search);
+  const urlFilter = params.get("filter") || "all";
+  currentFilter = urlFilter;
+
+  const activeBtn = document.querySelector(`[data-filter="${urlFilter}"]`);
+  if (activeBtn) {
+    document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
+    activeBtn.classList.add("active");
+  }
+
   try {
     allReports = await getAllReports();
     renderReports('all');
+    setupFlagModalListeners();
+    setupReportActionModalListeners();
   } catch (err) {
     console.error('Failed to load reports:', err);
     renderMessage('No records yet.');
@@ -28,11 +41,43 @@ document.addEventListener("DOMContentLoaded", async () => {
       tag.classList.add('active');
 
       const filter = tag.textContent.trim().toLowerCase();
+      currentFilter = filter;
       renderReports(filter);
     });
   });
 
   setupModalListeners();
+  setupFlagSubmission();
+
+  document.getElementById('response-ok-btn')?.addEventListener('click', () => {
+    document.getElementById('response-confirmation-modal').style.display = 'none';
+  });
+
+  document.getElementById("search-input").addEventListener("input", function () {
+    const query = this.value.trim().toLowerCase();
+
+    let filtered = allReports;
+
+    if (currentFilter === 'completed') {
+     filtered = filtered.filter(r => r.status.toLowerCase() === 'completed');
+    }
+
+    if (query) {
+     filtered = filtered.filter(report =>
+        report.item_name.toLowerCase().includes(query) ||
+        report.contact_info.toLowerCase().includes(query)
+     );
+   }
+
+   if (filtered.length === 0) {
+     renderMessage("No records found.");
+   } else {
+      renderReportsFromData(filtered);
+   }
+  });
+
+  setupFlagSubmission();
+
 });
 
 function setupModalListeners() {
@@ -55,6 +100,8 @@ function setupModalListeners() {
 
   const codeInput = document.getElementById("management-code");
   const confirmCodeInput = document.getElementById("confirm-management-code");
+  const foundCodeInput = document.getElementById("found-code");
+  const foundConfirmCodeInput = document.getElementById("found-confirm-code");
   const mismatchMsg = document.getElementById("code-mismatch-msg");
 
   if (!modal || !openBtn || !closeBtn) return;
@@ -79,17 +126,34 @@ function setupModalListeners() {
   });
 
   function validateCodeMatch() {
-    const code = codeInput.value.trim();
-    const confirmCode = confirmCodeInput.value.trim();
-    mismatchMsg.style.display = (code && confirmCode && code !== confirmCode) ? 'block' : 'none';
+    const selectedType = document.querySelector('input[name="report-type"]:checked')?.value;
+
+    const code = codeInput?.value.trim();
+    const confirmCode = confirmCodeInput?.value.trim();
+    const foundCode = foundCodeInput?.value.trim();
+    const foundConfirmCode = foundConfirmCodeInput?.value.trim();
+
+    let mismatch = false;
+
+    if (selectedType === "lost") {
+      mismatch = code && confirmCode && code !== confirmCode;
+    } else if (selectedType === "found" && !surrenderedCheckbox.checked) {
+      mismatch = foundCode && foundConfirmCode && foundCode !== foundConfirmCode;
+    }
+
+    mismatchMsg.style.display = mismatch ? "block" : "none";
   }
 
   codeInput.addEventListener('input', validateCodeMatch);
   confirmCodeInput.addEventListener('input', validateCodeMatch);
+  foundCodeInput.addEventListener('input', validateCodeMatch);
+  foundConfirmCodeInput.addEventListener('input', validateCodeMatch);
 
   reportTypeRadios.forEach(radio => {
     radio.addEventListener("change", () => {
-      const isLost = radio.value === "lost";
+      const selectedType = document.querySelector('input[name="report-type"]:checked')?.value;
+      const isLost = selectedType === "lost";
+
       descriptionRow.style.display = isLost ? "flex" : "none";
       codeRow.style.display = isLost ? "flex" : "none";
       confirmCodeRow.style.display = isLost ? "flex" : "none";
@@ -107,6 +171,13 @@ function setupModalListeners() {
         foundConfirmCodeRow.style.display = "none";
         foundCodeNote.style.display = "none";
       }
+
+      mismatchMsg.style.display = "none";
+
+      codeInput.value = "";
+      confirmCodeInput.value = "";
+      foundCodeInput.value = "";
+      foundConfirmCodeInput.value = "";
     });
   });
 
@@ -115,11 +186,59 @@ function setupModalListeners() {
     foundCodeRow.style.display = showCodeFields ? "flex" : "none";
     foundConfirmCodeRow.style.display = showCodeFields ? "flex" : "none";
     foundCodeNote.style.display = showCodeFields ? "flex" : "none";
+
+    mismatchMsg.style.display = "none";
+    foundCodeInput.value = "";
+    foundConfirmCodeInput.value = "";
+  });
+}
+
+function setupFlagSubmission() {
+  const submitBtn = document.getElementById("submit-flag-btn");
+  const flagModal = document.getElementById("flag-modal");
+  const confirmationModal = document.getElementById("flag-confirmation-modal");
+  const closeConfirmationBtn = document.querySelector(".close-confirmation");
+
+  submitBtn.addEventListener("click", async () => {
+    const selectedReason = document.getElementById("report-reason").value;
+    const reportId = flagModal.getAttribute("data-report-id");
+
+    if (!selectedReason) {
+      alert("Please select a reason.");
+      return;
+    }
+
+    try {
+      await submitFlag(reportId, selectedReason);
+
+      flagModal.style.display = "none";
+      confirmationModal.style.display = "flex";
+    } catch (err) {
+      console.error("Error submitting flag:", err);
+      alert("Something went wrong while reporting.");
+    }
+  });
+
+  closeConfirmationBtn.addEventListener("click", () => {
+    confirmationModal.style.display = "none";
+  });
+
+  window.addEventListener("click", (e) => {
+    if (e.target === confirmationModal) {
+      confirmationModal.style.display = "none";
+    }
   });
 }
 
 document.getElementById('submit-report').addEventListener('click', async (e) => {
   e.preventDefault();
+
+  const selectedType = document.querySelector('input[name="report-type"]:checked');
+  if (selectedType) {
+    selectedType.dispatchEvent(new Event('change'));
+  }
+
+  document.getElementById("code-mismatch-msg").style.display = "none";
 
   const type = document.querySelector('input[name="report-type"]:checked')?.value;
   const itemName = document.getElementById("item-name")?.value.trim();
@@ -146,8 +265,13 @@ document.getElementById('submit-report').addEventListener('click', async (e) => 
       alert("Please complete all required fields for lost items.");
       return;
     }
+    if (code.length !== 6 || confirmCode.length !== 6) {
+      alert("Your code must be exactly 6 characters.");
+      return;
+    }
     if (code !== confirmCode) {
       alert("Codes do not match.");
+      document.getElementById("code-mismatch-msg").style.display = "block";
       return;
     }
   }
@@ -157,8 +281,13 @@ document.getElementById('submit-report').addEventListener('click', async (e) => 
       alert("Please complete the code fields for found item.");
       return;
     }
+    if (foundCode.length !== 6 || foundConfirmCode.length !== 6) {
+      alert("Your code must be exactly 6 characters.");
+      return;
+    }
     if (foundCode !== foundConfirmCode) {
       alert("Codes do not match.");
+      document.getElementById("code-mismatch-msg").style.display = "block";
       return;
     }
   }
@@ -201,15 +330,16 @@ document.getElementById('submit-report').addEventListener('click', async (e) => 
     }
 
     confirmationModal.style.display = 'flex';
+    document.getElementById('report-modal').style.display = 'none';
 
     allReports = await getAllReports();
     renderReports('all');
+    setupFlagModalListeners();
 
   } catch (err) {
     alert(`Submission failed: ${err.message}`);
   }
 });
-
 
 document.getElementById('confirm-ok-btn').addEventListener('click', () => {
   const confirmationModal = document.getElementById('confirmation-modal');
@@ -224,8 +354,55 @@ document.getElementById('confirm-ok-btn').addEventListener('click', () => {
   }
 });
 
+document.getElementById('submit-action-btn').addEventListener('click', async () => {
+  const name = document.getElementById('response-name')?.value.trim();
+  const contact = document.getElementById('response-contact')?.value.trim();
+  const message = document.getElementById('response-message')?.value.trim();
+  const reportId = document.getElementById("action-modal").getAttribute("data-report-id");
+
+  if (!name || !contact || !message) {
+    alert("Please fill out all fields.");
+    return;
+  }
+
+  if (message.length > 20) {
+    alert("Message must be under 20 characters.");
+    return;
+  }
+
+  try {
+    await submitResponse(reportId, {
+      name,
+      contact_info: contact,
+      message
+    });
+
+    const modalTitle = document.querySelector("#action-modal h2")?.textContent?.trim();
+
+    if (modalTitle === "Claim Form") {
+      document.getElementById("response-confirmation-message").textContent = "Thank You!";
+      document.getElementById("response-confirmation-details").textContent =
+        "The uploader will review your claim. If it's urgent, feel free to contact them directly using the information provided in the post.";
+    } else if (modalTitle === "Item Return Form") {
+      document.getElementById("response-confirmation-message").textContent = "Thanks for reaching out!";
+      document.getElementById("response-confirmation-details").textContent =
+        "The original reporter will review your message and may contact you if your description matches the lost item.";
+    }
+
+    document.getElementById("response-confirmation-modal").style.display = "flex";
+    document.getElementById("action-modal").style.display = "none";
+    document.getElementById("action-form").reset();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  } catch (err) {
+    console.error("Error submitting response:", err);
+    alert("Failed to send response. Please try again.");
+  }
+});
+
 
 function renderReports(filter) {
+  sessionStorage.setItem('lastFilter', filter);
   const container = document.getElementById('reports-container');
   container.innerHTML = '';
 
@@ -248,24 +425,46 @@ function renderReports(filter) {
     const card = document.createElement('div');
     card.className = 'report-card';
 
+    card.addEventListener('click', () => {
+      window.location.href = `reports.html?report_id=${report.report_id}`;
+    });
+
     const isHidden = report.type === 'found' && report.is_surrendered;
     const photoUrl = isHidden
       ? 'assets/img/HIDDEN.png'
       : (report.photo_urls?.[0] || 'assets/img/placeholder.png');
 
-    if (isHidden) {
-      card.classList.add('found-surrendered');
-    }
+    if (isHidden) card.classList.add('found-surrendered');
 
     const buttonText = report.type === 'lost'
       ? 'I Found This'
       : 'Claim Item';
 
-    const isButtonDisabled = report.type === 'found' && report.is_surrendered;
+    let statusLabel = '';
+    let statusClass = '';
+
+    if (report.type === 'lost' && report.status === 'unclaimed') {
+      statusLabel = 'Not Found';
+      statusClass = 'status-pill lost-status';
+    } else if (report.type === 'found' && report.status === 'unclaimed') {
+      statusLabel = 'Unclaimed';
+      statusClass = 'status-pill lost-status';
+    } else if (report.type === 'lost' && report.status === 'completed') {
+      statusLabel = 'Found';
+      statusClass = 'status-pill found-status';
+    } else if (report.type === 'found' && report.status === 'completed') {
+      statusLabel = 'Claimed';
+      statusClass = 'status-pill found-status';
+    }
+
+    const isButtonDisabled = report.status === 'completed' || (report.type === 'found' && report.is_surrendered);
 
     let infoContent = `
       <p><strong>Item Name:</strong> ${report.item_name}</p>
-      <p><strong>Type:</strong> ${report.type}</p>
+      <p>
+        <strong>Type:</strong> 
+        <span class="type-pill ${report.type.toLowerCase()}">${report.type.charAt(0).toUpperCase() + report.type.slice(1)}</span>
+      </p>
       <p><strong>Created:</strong> ${new Date(report.created_at).toLocaleString()}</p>
     `;
 
@@ -276,7 +475,171 @@ function renderReports(filter) {
 
       infoContent += `
         <p><strong>Description:</strong> ${description}</p>
-        <p><strong>Status:</strong> ${report.status}</p>
+        <p>
+          <strong>Status:</strong> 
+          <span class="${statusClass}">${statusLabel}</span>
+        </p>
+      `;
+    } else {
+      infoContent += `
+        <p class="surrendered-info">
+          <i class="fas fa-info-circle"></i>
+          <span><em>This item has been surrendered to the PUP Guardhouse...</em></span>
+        </p>
+      `;
+    }
+
+    card.innerHTML = `
+      <div class="report-photo">
+        <img src="${photoUrl}" alt="Photo of ${report.item_name || 'item'}">
+        <i class="fas fa-flag flag-icon" data-report-id="${report.report_id}"></i>
+      </div>
+      <div class="report-info">
+        ${infoContent}
+        <button class="report-action-btn" data-report-id="${report.report_id}" ${isButtonDisabled ? 'disabled' : ''}>
+          <strong>${buttonText}</strong>
+        </button>
+      </div>
+    `;
+
+    container.appendChild(card);
+
+    card.querySelector('.flag-icon')?.addEventListener('click', (e) => {
+      e.stopPropagation();  
+      document.getElementById('flag-modal').style.display = 'flex';  
+      document.getElementById('flag-modal').setAttribute('data-report-id', report.report_id);
+    });
+  });
+}
+
+function setupReportActionModalListeners() {
+  const actionModal = document.getElementById("action-modal");
+  const modalTitle = document.getElementById("action-modal-title");
+  const messageField = document.getElementById("response-message");
+  const closeModalBtn = document.querySelector(".close-action-modal");
+
+  document.querySelectorAll(".report-action-btn").forEach(button => {
+    button.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      const btnText = button.textContent.trim();
+      if (btnText === "I Found This") {
+        modalTitle.textContent = "Item Return Form";
+        messageField.placeholder = "Leave a message for the owner — feel free to share where you found the item or how they can contact you.";
+      } else if (btnText === "Claim Item") {
+        modalTitle.textContent = "Claim Form";
+        messageField.placeholder = "Include the location you lost it and a unique characteristic (e.g. color, tag, mark) to help confirm it's yours.";
+      } else {
+        modalTitle.textContent = "Action Form";
+        messageField.placeholder = "";
+      }
+
+      const reportId = button.getAttribute("data-report-id");
+      actionModal.setAttribute("data-report-id", reportId);
+      actionModal.style.display = "flex";
+    });
+  });
+
+  closeModalBtn.addEventListener("click", () => {
+    actionModal.style.display = "none";
+  });
+
+  window.addEventListener("click", (e) => {
+    if (e.target === actionModal) {
+      actionModal.style.display = "none";
+    }
+  });
+}
+
+function setupFlagModalListeners() {
+  const flagModal = document.getElementById("flag-modal");
+  const closeBtn = document.querySelector(".close-flag-modal");
+
+  document.querySelectorAll(".flag-icon").forEach(icon => {
+    icon.addEventListener("click", (e) => {
+      e.stopPropagation(); 
+      const reportId = icon.getAttribute("data-report-id");
+      const flagModal = document.getElementById("flag-modal");
+      flagModal.setAttribute("data-report-id", reportId);
+      flagModal.style.display = "flex";
+    });
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      flagModal.style.display = "none";
+    });
+  }
+
+  window.addEventListener("click", (e) => {
+    if (e.target === flagModal) {
+      flagModal.style.display = "none";
+    }
+  });
+}
+
+function renderReportsFromData(data) {
+  const container = document.getElementById('reports-container');
+  container.innerHTML = '';
+
+  data.forEach(report => {
+    const card = document.createElement('div');
+    card.className = 'report-card';
+
+    card.addEventListener('click', () => {
+      window.location.href = `reports.html?report_id=${report.report_id}`;
+    });
+
+    const isHidden = report.type === 'found' && report.is_surrendered;
+    const photoUrl = isHidden
+      ? 'assets/img/HIDDEN.png'
+      : (report.photo_urls?.[0] || 'assets/img/placeholder.png');
+
+    if (isHidden) card.classList.add('found-surrendered');
+
+    const buttonText = report.type === 'lost'
+      ? 'I Found This'
+      : 'Claim Item';
+
+    let statusLabel = '';
+    let statusClass = '';
+
+    if (report.type === 'lost' && report.status === 'unclaimed') {
+      statusLabel = 'Not Found';
+      statusClass = 'status-pill lost-status';
+    } else if (report.type === 'found' && report.status === 'unclaimed') {
+      statusLabel = 'Unclaimed';
+      statusClass = 'status-pill lost-status';
+    } else if (report.type === 'lost' && report.status === 'completed') {
+      statusLabel = 'Found';
+      statusClass = 'status-pill found-status';
+    } else if (report.type === 'found' && report.status === 'completed') {
+      statusLabel = 'Claimed';
+      statusClass = 'status-pill found-status';
+    }
+
+    const isButtonDisabled = report.status === 'completed' || (report.type === 'found' && report.is_surrendered);
+
+    let infoContent = `
+      <p><strong>Item Name:</strong> ${report.item_name}</p>
+      <p>
+        <strong>Type:</strong> 
+        <span class="type-pill ${report.type.toLowerCase()}">${report.type.charAt(0).toUpperCase() + report.type.slice(1)}</span>
+      </p>
+      <p><strong>Created:</strong> ${new Date(report.created_at).toLocaleString()}</p>
+    `;
+
+    if (!isHidden) {
+      const description = (report.description || '').length > 50
+        ? report.description.substring(0, 47) + '...'
+        : report.description || '';
+
+      infoContent += `
+        <p><strong>Description:</strong> ${description}</p>
+        <p>
+          <strong>Status:</strong> 
+          <span class="${statusClass}">${statusLabel}</span>
+        </p>
       `;
     } else {
       infoContent += `
@@ -294,7 +657,7 @@ function renderReports(filter) {
       </div>
       <div class="report-info">
         ${infoContent}
-        <button class="report-action-btn" ${isButtonDisabled ? 'disabled' : ''}>
+        <button class="report-action-btn" data-report-id="${report.report_id}" ${isButtonDisabled ? 'disabled' : ''}>
           <strong>${buttonText}</strong>
         </button>
       </div>
@@ -304,10 +667,11 @@ function renderReports(filter) {
   });
 }
 
-
-
-
 function renderMessage(msg) {
   const container = document.getElementById('reports-container');
-  container.innerHTML = `<p class="no-records">${msg}</p>`;
+  container.innerHTML = `
+    <div class="no-records-wrapper">
+      <p class="no-records">${msg}</p>
+    </div>
+  `;
 }

@@ -96,8 +96,6 @@ export async function submitReport(reportData) {
   return await response.json();
 }
 
-
-
 export async function uploadPhoto(reportId, file) {
   const config = await loadConfig();
   const baseUrl = config.API_BASE_URL;
@@ -114,5 +112,45 @@ export async function uploadPhoto(reportId, file) {
     throw new Error(err.detail || "Failed to upload photo.");
   }
 
-  return await res.json(); // { message, photo_url }
+  return await res.json();  
+}
+
+export async function submitFlag(reportId, reason) {
+  const config = await loadConfig();
+  const baseUrl = config.API_BASE_URL;
+
+  const response = await fetch(`${baseUrl}/reports/${reportId}/flags`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ reason })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Failed to flag report");
+  }
+
+  return await response.json();  
+}
+
+export async function submitResponse(reportId, responseData) {
+  const config = await loadConfig();
+  const baseUrl = config.API_BASE_URL;
+
+  const res = await fetch(`${baseUrl}/reports/${reportId}/responses`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(responseData)
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.detail || 'Failed to submit response');
+  }
+
+  return await res.json();
 }
