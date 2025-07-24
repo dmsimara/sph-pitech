@@ -4,13 +4,17 @@ let allReports = [];
 let currentFilter = "all";
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const sidebarRes = await fetch('/web/components/base.html');
+  const sidebarRes = await fetch('components/base.html');
   const sidebarHtml = await sidebarRes.text();
   document.getElementById('sidebar-container').innerHTML = sidebarHtml;
 
   const currentPath = window.location.pathname;
   document.querySelectorAll('.nav-links a').forEach(link => {
-    if (link.getAttribute('href') === currentPath) {
+    const href = link.getAttribute('href');
+    if (
+      (href.includes('lost-found.html') || href.includes('reports.html')) &&
+      (currentPath.includes('lost-found.html') || currentPath.includes('reports.html'))
+    ) {
       link.classList.add('active');
     }
   });

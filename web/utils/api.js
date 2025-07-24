@@ -2,14 +2,14 @@ let config = null;
 
 async function loadConfig() {
   if (!config) {
-    const res = await fetch('/web/config.json');
+    const res = await fetch('config.json');
     config = await res.json();
   }
   return config;
 }
 
 export async function getFinderData() {
-  const response = await fetch('/web/config.json');
+  const response = await fetch('config.json');
   const config = await response.json();
   const baseUrl = config.API_BASE_URL;
 

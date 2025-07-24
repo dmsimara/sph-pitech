@@ -12,13 +12,17 @@ const programNameMap = {
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const sidebarRes = await fetch('/web/components/base.html');
+  const sidebarRes = await fetch('components/base.html');
   const sidebarHtml = await sidebarRes.text();
   document.getElementById('sidebar-container').innerHTML = sidebarHtml;
 
   const currentPath = window.location.pathname;
   document.querySelectorAll('.nav-links a').forEach(link => {
-    if (link.getAttribute('href') === currentPath) {
+    const href = link.getAttribute('href');
+    if (
+      (href.includes('directory.html') || href.includes('blocks.html')) &&
+      (currentPath.includes('directory.html') || currentPath.includes('blocks.html'))
+    ) {
       link.classList.add('active');
     }
   });
@@ -107,5 +111,5 @@ proceedBtn.addEventListener('click', () => {
   localStorage.setItem('selectedProgram', selectedProgram);
   localStorage.setItem('selectedYear', selectedYear);
 
-  window.location.href = '/web/blocks.html';
+  window.location.href = 'blocks.html';
 });

@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PUPSeek</title>
-  <link rel="icon" type="image/x-icon" href="/web/assets/img/PUPSEEK1.png" />
-  <link rel="stylesheet" href="/web/assets/css/base.css" />
-  <link rel="stylesheet" href="/web/assets/css/lost-found.css" />
+  <link rel="icon" type="image/x-icon" href="assets/img/PUPSEEK1.png" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/lost-found.css" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 </head>
 <body>
@@ -52,7 +52,7 @@
 
                     <div class="form-row">
                         <label class="form-label">Item Name:</label>
-                        <input type="text" id="item-name" class="form-input"/>
+                        <input type="text" id="item-name" class="form-input" maxlength="6"/>
                     </div>
 
                     <div class="form-row">
@@ -129,7 +129,7 @@
         <!-- Confirmation Modal -->
         <div class="modal" id="confirmation-modal" style="display: none;">
             <div class="modal-content confirmation-modal-content">
-                <img src="/web/assets/img/CONFIRMATION.png" alt="Confirmation" class="confirmation-image" />
+                <img src="assets/img/CONFIRMATION.png" alt="Confirmation" class="confirmation-image" />
                 <h1 id="confirmation-message" class="confirmation-heading"></h1>
                 <p id="confirmation-details" class="confirmation-details"></p>
                 <button id="confirm-ok-btn" class="confirm-ok-btn">Okay</button>
@@ -205,7 +205,7 @@
         <!-- Response Confirmation Modal -->
         <div class="modal" id="response-confirmation-modal" style="display: none;">
             <div class="modal-content confirmation-modal-content">
-                <img src="/web/assets/img/CONFIRMATION.png" alt="Confirmation" class="confirmation-image" />
+                <img src="assets/img/CONFIRMATION.png" alt="Confirmation" class="confirmation-image" />
                 <h1 id="response-confirmation-message" class="confirmation-heading"></h1>
                 <p id="response-confirmation-details" class="confirmation-details"></p>
                 <button id="response-ok-btn" class="confirm-ok-btn">Okay</button>
@@ -216,6 +216,6 @@
     </main>
   </div>
 
-  <script type="module" src="/web/assets/js/lost-found.js"></script>
+  <script type="module" src="assets/js/lost-found.js"></script>
 </body>
 </html>

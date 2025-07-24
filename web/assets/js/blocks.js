@@ -1,7 +1,7 @@
 import { getFinderData } from '../../utils/api.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const sidebarRes = await fetch('/web/components/base.html');
+  const sidebarRes = await fetch('components/base.html');
   const sidebarHtml = await sidebarRes.text();
   document.getElementById('sidebar-container').innerHTML = sidebarHtml;
 
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         sectionEl.addEventListener('click', () => {
             localStorage.setItem('selectedSection', section);
-            window.location.href = '/web/representative.html';
+            window.location.href = 'representative.html';
         });
 
         blocksContainer.appendChild(sectionEl);

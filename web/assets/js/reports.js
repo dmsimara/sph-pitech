@@ -24,8 +24,8 @@ async function loadReportDetails() {
     document.querySelector('.directory-header h1').textContent = mainTitle;
 
     const photoUrl = (report.type === 'found' && report.is_surrendered)
-      ? '/web/assets/img/HIDDEN.png'
-      : (report.photo_urls?.[0] || '/web/assets/img/placeholder.png');
+      ? 'assets/img/HIDDEN.png'
+      : (report.photo_urls?.[0] || 'assets/img/placeholder.png');
 
     const photoContainer = document.querySelector('.report-photo');
     photoContainer.innerHTML = `
@@ -292,7 +292,7 @@ window.addEventListener('click', (e) => {
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const sidebarRes = await fetch('/web/components/base.html');
+  const sidebarRes = await fetch('components/base.html');
   const sidebarHtml = await sidebarRes.text();
   document.getElementById('sidebar-container').innerHTML = sidebarHtml;
 
@@ -310,7 +310,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.querySelector('.back-button')?.addEventListener('click', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const filter = urlParams.get('from') || 'all';
-    window.location.href = `/web/lost-found.html?filter=${filter}`;
+    window.location.href = `lost-found.html?filter=${filter}`;
   });
 
   await loadReportDetails();
@@ -318,7 +318,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.getElementById("confirm-ok-btn").addEventListener("click", () => {
     document.getElementById("confirmation-modal").style.display = "none";
-    window.location.href = "/web/lost-found.html";
+    window.location.href = "lost-found.html";
   });
 });
 
