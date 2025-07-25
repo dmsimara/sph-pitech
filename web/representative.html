@@ -11,26 +11,38 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 </head>
 <body>
-  <div class="layout">
-    <div id="sidebar-container"></div>
+    <div id="spinner" class="spinner-overlay">
+        <div class="spinner-container">
+        <div class="cube-spinner">
+            <div class="cube1"></div>
+            <div class="cube2"></div>
+            <div class="cube3"></div>
+            <div class="cube4"></div>
+        </div>
+        <p class="loading-text">Loading, please wait...</p>
+        </div>
+    </div>
 
-    <main class="main-content">
-      <div class="directory-header">
-        <a href="blocks.html" class="back-button">
-            <i class="fas fa-arrow-left"></i>
-        </a>
-        <h1>Class Directory</h1>
-      </div>
+    <div class="layout">
+      <div id="sidebar-container"></div>
 
-      <div class="rep-info">
-        <h3>Block Representative Information</h3>
+      <main class="main-content">
+        <div class="directory-header">
+          <a href="blocks.html" class="back-button">
+              <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1>Class Directory</h1>
+        </div>
 
-        <!-- Dynamic rep info is inserted here -->
+        <div class="rep-info">
+          <h3>Block Representative Information</h3>
 
-      </div>
+          <!-- Dynamic rep info is inserted here -->
 
-    </main>
-  </div>
+        </div>
+
+      </main>
+    </div>
 
   <script type="module" src="assets/js/representative.js"></script>
 </body>

@@ -1,18 +1,10 @@
 import { getAllReports, updateReport, deleteReport, markReportAsCompleted, getReportResponses } from '../../utils/api.js';
+import { showSpinner, hideSpinner } from './spinner.js';
 
 let verifiedCode = ""; 
 
-// Spinner functions defined globally
-function showSpinner() {
-  document.getElementById('spinner')?.style.setProperty('display', 'flex', 'important');
-}
-
-function hideSpinner() {
-  document.getElementById('spinner')?.style.setProperty('display', 'none', 'important');
-}
-
-
 async function loadReportDetails() {
+  showSpinner();
   const urlParams = new URLSearchParams(window.location.search);
   const reportId = urlParams.get('report_id');
 
@@ -22,7 +14,6 @@ async function loadReportDetails() {
   }
 
   try {
-    showSpinner();
     const reports = await getAllReports();
     const report = reports.find(r => r.report_id === reportId);
 
@@ -143,17 +134,18 @@ function setupEditIconListeners() {
   });
 
   document.getElementById("confirm-code-btn").addEventListener("click", async () => {
+    showSpinner();
     const codeEntered = document.getElementById("code-input").value.trim();
     const reportId = document.getElementById("code-modal").getAttribute("data-report-id");
     const mode = document.getElementById("code-modal").getAttribute("data-mode");
 
     if (!reportId || codeEntered.length !== 6) {
       document.getElementById("code-error").style.display = "block";
+      hideSpinner();
       return;
     }
 
     try {
-      showSpinner();
       await updateReport(reportId, {}, codeEntered);  
       verifiedCode = codeEntered;
 
@@ -259,11 +251,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.getElementById("edit-report-form").addEventListener("submit", async (e) => {
   e.preventDefault();
+  showSpinner();
 
   const reportId = document.getElementById("code-modal").getAttribute("data-report-id");
 
   if (!reportId || !verifiedCode) {
     alert("Missing report ID or verified code.");
+    hideSpinner();
     return;
   }
 
@@ -279,7 +273,6 @@ document.getElementById("edit-report-form").addEventListener("submit", async (e)
   };
 
   try {
-    showSpinner();
     await updateReport(reportId, updatedData, verifiedCode);
 
     document.getElementById("edit-report-modal").style.display = "none";
@@ -300,15 +293,17 @@ document.getElementById("cancel-delete-btn").addEventListener("click", () => {
 });
 
 document.getElementById("confirm-delete-btn").addEventListener("click", async () => {
+  showSpinner();
+
   const reportId = document.getElementById("code-modal").getAttribute("data-report-id");
 
   if (!reportId || !verifiedCode) {
     alert("Missing report ID or verified code.");
+    hideSpinner();
     return;
   }
 
   try {
-    showSpinner();
     await deleteReport(reportId, verifiedCode);
 
     document.getElementById("delete-modal").style.display = "none";
@@ -329,7 +324,7 @@ function getStatusLabel(report) {
 
   if (type === 'lost' && status === 'unclaimed') return { text: 'Not Found', class: 'status-orange' };
   if (type === 'found' && status === 'unclaimed') return { text: 'Unclaimed', class: 'status-orange' };
-  if (type === 'lost' && status === 'claimed') return { text: 'Found', class: 'status-green' };
+  if (type === 'lost' && status === 'completed') return { text: 'Found', class: 'status-green' };
   if (type === 'found' && (status === 'claimed' || status === 'completed') && is_surrendered) return { text: 'Completed', class: 'status-green' };
   if (type === 'found' && status === 'claimed') return { text: 'Claimed', class: 'status-green' };
 
@@ -350,10 +345,6 @@ window.addEventListener('click', (e) => {
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const spinnerRes = await fetch('components/spinner.html');
-  const spinnerHtml = await spinnerRes.text();
-  document.body.insertAdjacentHTML('beforeend', spinnerHtml);
-  
   const sidebarRes = await fetch('components/base.html');
   const sidebarHtml = await sidebarRes.text();
   document.getElementById('sidebar-container').innerHTML = sidebarHtml;
@@ -376,14 +367,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   try {
-    showSpinner();
     await loadReportDetails();
   } catch (err) {
     console.error("Failed to load report details:", err);
     alert("Something went wrong while loading the report.");
-  } finally {
-    hideSpinner();
-  }
+  } 
 
   setupEditIconListeners();
 
@@ -400,14 +388,15 @@ document.getElementById("cancel-complete-btn").addEventListener("click", () => {
 });
 
 document.getElementById("confirm-complete-btn").addEventListener("click", async () => {
+  showSpinner();
   const reportId = document.getElementById("code-modal").getAttribute("data-report-id");
   if (!reportId || !verifiedCode) {
     alert("Missing report ID or verified code.");
+    hideSpinner();
     return;
   }
 
   try {
-    showSpinner();
     await markReportAsCompleted(reportId, verifiedCode);
 
     document.getElementById("completed-modal").style.display = "none";

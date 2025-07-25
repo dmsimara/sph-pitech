@@ -1,4 +1,5 @@
 import { getFinderData } from '../../utils/api.js';
+import { showSpinner, hideSpinner } from './spinner.js';
 
 const collegeNameMap = {
   "CCIS": "College of Computer and Information Sciences",
@@ -16,18 +17,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const sidebarHtml = await sidebarRes.text();
   document.getElementById('sidebar-container').innerHTML = sidebarHtml;
 
-  const spinnerRes = await fetch('components/spinner.html');
-  const spinnerHtml = await spinnerRes.text();
-  document.body.insertAdjacentHTML('beforeend', spinnerHtml);
-
-  function showSpinner() {
-    document.getElementById('spinner')?.style.setProperty('display', 'flex', 'important');
-  }
-
-  function hideSpinner() {
-    document.getElementById('spinner')?.style.setProperty('display', 'none', 'important');
-  }
-
   const currentPath = window.location.pathname;
   document.querySelectorAll('.nav-links a').forEach(link => {
     const href = link.getAttribute('href');
@@ -39,9 +28,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  showSpinner();
   initDropdowns();
-  hideSpinner();
 });
 
 let academicData = null;
@@ -51,6 +38,7 @@ async function initDropdowns() {
   const programDropdown = document.getElementById('program-dropdown');
   const yearDropdown = document.getElementById('year-dropdown');
 
+  showSpinner();
   try {
     academicData = await getFinderData();
 
@@ -62,6 +50,8 @@ async function initDropdowns() {
     });
   } catch (err) {
     console.error('Error loading finder data:', err);
+  } finally {
+    hideSpinner();  
   }
 
   collegeDropdown.addEventListener('change', () => {

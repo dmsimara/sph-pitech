@@ -6,231 +6,242 @@
   <title>PUPSeek</title>
   <link rel="icon" type="image/x-icon" href="assets/img/PUPSEEK1.png" />
   <link rel="stylesheet" href="assets/css/base.css" />
-  <link rel="stylesheet" href="assets/css/spinner.css" />
+  <link rel="stylesheet" href="assets/css/spinner.css">
   <link rel="stylesheet" href="assets/css/lost-found.css" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 </head>
 <body>
-  <div class="layout">
-    <div id="sidebar-container"></div>
-
-    <main class="main-content">
-      <div class="directory-header">
-        <h1>Lost & Found</h1>
-        <div class="search-bar">
-            <i class="fas fa-search"></i>
-            <input id="search-input" type="text" placeholder="Search Lost and Found" />
+    <div id="spinner" class="spinner-overlay">
+        <div class="spinner-container">
+        <div class="cube-spinner">
+            <div class="cube1"></div>
+            <div class="cube2"></div>
+            <div class="cube3"></div>
+            <div class="cube4"></div>
         </div>
-      </div>
-
-      <div class="filter-bar">
-        <div class="filter-tags">
-            <p class="filter-tag active">All</p>
-            <p class="filter-tag">Completed</p>
+        <p class="loading-text">Loading, please wait...</p>
         </div>
-        <div class="report-button" id="open-report-modal">
-            <i class="fas fa-plus"></i>
-            <span>Report an Item</span>
-        </div>
-      </div>
+    </div>
 
-        <!-- Report Modal -->
-        <div class="modal-overlay" id="report-modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Report Lost or Found Item</h2>
-                    <span class="close-button" id="close-report-modal">&times;</span>
-                </div>
-                
-                <form id="report-form">
-                    <div class="form-row">
-                        <label class="form-label">Item Type:</label>
-                        <div class="radio-group">
-                            <label><input type="radio" name="report-type" value="lost"/> Lost</label>
-                            <label><input type="radio" name="report-type" value="found" /> Found</label>
+    <div class="layout">
+        <div id="sidebar-container"></div>
+
+        <main class="main-content">
+        <div class="directory-header">
+            <h1>Lost & Found</h1>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input id="search-input" type="text" placeholder="Search Lost and Found" />
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="filter-tags">
+                <p class="filter-tag active">All</p>
+                <p class="filter-tag">Completed</p>
+            </div>
+            <div class="report-button" id="open-report-modal">
+                <i class="fas fa-plus"></i>
+                <span>Report an Item</span>
+            </div>
+        </div>
+
+            <!-- Report Modal -->
+            <div class="modal-overlay" id="report-modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Report Lost or Found Item</h2>
+                        <span class="close-button" id="close-report-modal">&times;</span>
+                    </div>
+                    
+                    <form id="report-form">
+                        <div class="form-row">
+                            <label class="form-label">Item Type:</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="report-type" value="lost"/> Lost</label>
+                                <label><input type="radio" name="report-type" value="found" /> Found</label>
+                            </div>
                         </div>
-                    </div>
-
-                   <div class="form-row">
-                        <label class="form-label">Item Name:</label>
-                        <select id="item-name-select" class="form-input">
-                            <option value="">-- Select an item --</option>
-                            <option value="ID Card">ID Card</option>
-                            <option value="Wallet/Money">Wallet/Money</option>
-                            <option value="Phone/Gadget">Phone/Gadget</option>
-                            <option value="Bag/Pouch">Bag/Pouch</option>
-                            <option value="Notebook/Document">Notebook/Document</option>
-                            <option value="Keys/Keychain">Keys/Keychain</option>
-                            <option value="Clothing/Shoes">Clothing/Shoes</option>
-                            <option value="Accessory/Jewelry">Accessory/Jewelry</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-
-                    <div class="form-row" id="custom-item-row" style="display: none;">
-                        <label class="form-label">Specify Item:</label>
-                        <input type="text" id="custom-item-name" class="form-input" placeholder="Enter item name" maxlength="30">
-                    </div>
 
                     <div class="form-row">
-                        <label class="form-label">Photo:</label>
-                        <input type="file" id="report-photo" name="photo" class="form-input" accept=".jpg,.jpeg,.png" />
-                    </div>
-
-                    <div class="form-row">
-                        <label class="form-label">Contact Info:</label>
-                        <input type="text" id="contact-input" class="form-input"/>
-                    </div>
-
-                    <div class="form-row" id="description-row" style="display: none;">
-                        <label class="form-label" for="description">Description:</label>
-                        <input type="text" id="description" name="description" maxlength="20" class="form-input" />
-                    </div>
-
-                    <div class="form-row" id="code-row" style="display: none;">
-                        <label class="form-label" for="management-code">Set Personal Code:</label>
-                        <input type="password" id="management-code" name="management-code" class="form-input" placeholder="Set a 6-character code." maxlength="6"/>
-                    </div>
-
-                    <div class="form-row" id="confirm-code-row" style="display: none;">
-                        <label class="form-label" for="confirm-management-code">Confirm your Code:</label>
-                        <input type="password" id="confirm-management-code" name="confirm-management-code" class="form-input" placeholder="Re-enter your 6-character code to confirm." maxlength="6"/>
-                    </div>
-                    <div class="info-reminder" id="code-info-reminder" style="display: none;">
-                        <i class="fas fa-info-circle"></i>
-                        <p><em>Save this code— you'll need it to update or manage your report.</em></p>
-                    </div>
-
-
-                    <!-- FOUND UNIQUE INPUTS -->
-                    <div class="form-row" id="surrendered-row" style="display: none;">
-                        <label></label> <!-- empty label to align -->
-                        <div class="form-field checkbox-row">
-                                <input type="checkbox" id="is-surrendered" name="is-surrendered" />
-                                <p class="surrender-note">
-                                I already surrendered this item to the PUP Guardhouse.
-                                </p>
+                            <label class="form-label">Item Name:</label>
+                            <select id="item-name-select" class="form-input">
+                                <option value="">-- Select an item --</option>
+                                <option value="ID Card">ID Card</option>
+                                <option value="Wallet/Money">Wallet/Money</option>
+                                <option value="Phone/Gadget">Phone/Gadget</option>
+                                <option value="Bag/Pouch">Bag/Pouch</option>
+                                <option value="Notebook/Document">Notebook/Document</option>
+                                <option value="Keys/Keychain">Keys/Keychain</option>
+                                <option value="Clothing/Shoes">Clothing/Shoes</option>
+                                <option value="Accessory/Jewelry">Accessory/Jewelry</option>
+                                <option value="Other">Other</option>
+                            </select>
                         </div>
-                    </div>
 
-                    <div class="form-row" id="found-code-row" style="display: none;">
-                        <label class="form-label" for="found-code">Set Personal Code</label>
-                        <input type="password" id="found-code" name="found-code" placeholder="Set a 6-character code." maxlength="6" class="form-input" />
-                    </div>
+                        <div class="form-row" id="custom-item-row" style="display: none;">
+                            <label class="form-label">Specify Item:</label>
+                            <input type="text" id="custom-item-name" class="form-input" placeholder="Enter item name" maxlength="30">
+                        </div>
 
-                    <div class="form-row" id="found-confirm-code-row" style="display: none;">
-                        <label class="form-label" for="found-confirm-code">Confirm your Code</label>
-                        <input type="password" id="found-confirm-code" name="found-confirm-code" placeholder="Re-enter your 6-character code to confirm." maxlength="6" class="form-input"/>
-                    </div>
+                        <div class="form-row">
+                            <label class="form-label">Photo:</label>
+                            <input type="file" id="report-photo" name="photo" class="form-input" accept=".jpg,.jpeg,.png" />
+                        </div>
 
-                    <div class="form-row" id="found-code-note" style="display: none;">
-                        <label></label>
-                        <div class="info-note">
+                        <div class="form-row">
+                            <label class="form-label">Contact Info:</label>
+                            <input type="text" id="contact-input" class="form-input"/>
+                        </div>
+
+                        <div class="form-row" id="description-row" style="display: none;">
+                            <label class="form-label" for="description">Description:</label>
+                            <input type="text" id="description" name="description" maxlength="20" class="form-input" />
+                        </div>
+
+                        <div class="form-row" id="code-row" style="display: none;">
+                            <label class="form-label" for="management-code">Set Personal Code:</label>
+                            <input type="password" id="management-code" name="management-code" class="form-input" placeholder="Set a 6-character code." maxlength="6"/>
+                        </div>
+
+                        <div class="form-row" id="confirm-code-row" style="display: none;">
+                            <label class="form-label" for="confirm-management-code">Confirm your Code:</label>
+                            <input type="password" id="confirm-management-code" name="confirm-management-code" class="form-input" placeholder="Re-enter your 6-character code to confirm." maxlength="6"/>
+                        </div>
+                        <div class="info-reminder" id="code-info-reminder" style="display: none;">
                             <i class="fas fa-info-circle"></i>
-                            <p>Save this code — you'll need it to update or manage your report.</p>
+                            <p><em>Save this code— you'll need it to update or manage your report.</em></p>
                         </div>
-                    </div>
 
-                    <p id="code-mismatch-msg" style="display: none; color: red; font-size: 0.9rem; margin-left: 130px; margin-top: 12px; margin-bottom: -1rem;">Codes do not match.</p>
 
-                    <div id="form-content-placeholder" class="form-placeholder"></div>
+                        <!-- FOUND UNIQUE INPUTS -->
+                        <div class="form-row" id="surrendered-row" style="display: none;">
+                            <label></label> <!-- empty label to align -->
+                            <div class="form-field checkbox-row">
+                                    <input type="checkbox" id="is-surrendered" name="is-surrendered" />
+                                    <p class="surrender-note">
+                                    I already surrendered this item to the PUP Guardhouse.
+                                    </p>
+                            </div>
+                        </div>
 
-                    <div class="form-row submit-container">
-                        <button id="submit-report" class="submit-btn">Submit</button>
-                    </div>
-                </form>
+                        <div class="form-row" id="found-code-row" style="display: none;">
+                            <label class="form-label" for="found-code">Set Personal Code</label>
+                            <input type="password" id="found-code" name="found-code" placeholder="Set a 6-character code." maxlength="6" class="form-input" />
+                        </div>
+
+                        <div class="form-row" id="found-confirm-code-row" style="display: none;">
+                            <label class="form-label" for="found-confirm-code">Confirm your Code</label>
+                            <input type="password" id="found-confirm-code" name="found-confirm-code" placeholder="Re-enter your 6-character code to confirm." maxlength="6" class="form-input"/>
+                        </div>
+
+                        <div class="form-row" id="found-code-note" style="display: none;">
+                            <label></label>
+                            <div class="info-note">
+                                <i class="fas fa-info-circle"></i>
+                                <p>Save this code — you'll need it to update or manage your report.</p>
+                            </div>
+                        </div>
+
+                        <p id="code-mismatch-msg" style="display: none; color: red; font-size: 0.9rem; margin-left: 130px; margin-top: 12px; margin-bottom: -1rem;">Codes do not match.</p>
+
+                        <div id="form-content-placeholder" class="form-placeholder"></div>
+
+                        <div class="form-row submit-container">
+                            <button id="submit-report" class="submit-btn">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Confirmation Modal -->
+            <div class="modal" id="confirmation-modal" style="display: none;">
+                <div class="modal-content confirmation-modal-content">
+                    <img src="assets/img/CONFIRMATION.png" alt="Confirmation" class="confirmation-image" />
+                    <h1 id="confirmation-message" class="confirmation-heading"></h1>
+                    <p id="confirmation-details" class="confirmation-details"></p>
+                    <button id="confirm-ok-btn" class="confirm-ok-btn">Okay</button>
+                </div>
+            </div>
+
+        <!-- Reports will go here -->
+        <div id="reports-container" class="reports-container"></div>
+
+        <!-- Flag Report Modal -->
+        <div id="flag-modal" class="modal">
+                <div class="modal-content">
+                <span class="close close-flag-modal">&times;</span>
+                <h2 class="flag-title">Report this Post</h2>
+                <p class="flag-subtitle">Why do you want to report this review?</p>
+                <p class="flag-guidance">
+                    Please refer to our 
+                    <a href="guidelines.html" class="guideline-link" target="_blank">Community Guidelines</a> 
+                    for guidance.
+                </p>
+                <select id="report-reason" class="reason-dropdown">
+                    <option value="" disabled selected>Choose a reason</option>
+                    <option value="irrelevant">Irrelevant Report</option>
+                    <option value="inappropriate">Inappropriate Content</option>
+                    <option value="spam">Spam or Scam</option>
+                    <option value="duplicate">Duplicate Report</option>
+                    <option value="false-info">Incorrect Information</option>
+                </select>
+                <button id="submit-flag-btn" class="flag-submit-btn">Report</button>
             </div>
         </div>
 
-        <!-- Confirmation Modal -->
-        <div class="modal" id="confirmation-modal" style="display: none;">
-            <div class="modal-content confirmation-modal-content">
-                <img src="assets/img/CONFIRMATION.png" alt="Confirmation" class="confirmation-image" />
-                <h1 id="confirmation-message" class="confirmation-heading"></h1>
-                <p id="confirmation-details" class="confirmation-details"></p>
-                <button id="confirm-ok-btn" class="confirm-ok-btn">Okay</button>
+        <!-- Flag Report Confirmation Modal -->
+            <div id="flag-confirmation-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-confirmation">&times;</span>
+                    <h2 class="confirm-title">Report this Post</h2>
+                    <p><strong>Thank you for your concern.</strong></p>
+                    <p>Your report has been received and will help us keep PUPSeek a safe and trustworthy space.</p>
+                </div>
             </div>
-        </div>
 
-      <!-- Reports will go here -->
-      <div id="reports-container" class="reports-container"></div>
+            <!-- Action Modal -->
+            <div id="action-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-action-modal">&times;</span>
+                    <h2 id="action-modal-title" class="modal-title color-secondary">Action Form</h2>
 
-      <!-- Flag Report Modal -->
-       <div id="flag-modal" class="modal">
-            <div class="modal-content">
-             <span class="close close-flag-modal">&times;</span>
-             <h2 class="flag-title">Report this Post</h2>
-             <p class="flag-subtitle">Why do you want to report this review?</p>
-             <p class="flag-guidance">
-                Please refer to our 
-                <a href="guidelines.html" class="guideline-link" target="_blank">Community Guidelines</a> 
-                for guidance.
-             </p>
-             <select id="report-reason" class="reason-dropdown">
-                 <option value="" disabled selected>Choose a reason</option>
-                 <option value="irrelevant">Irrelevant Report</option>
-                 <option value="inappropriate">Inappropriate Content</option>
-                 <option value="spam">Spam or Scam</option>
-                 <option value="duplicate">Duplicate Report</option>
-                 <option value="false-info">Incorrect Information</option>
-             </select>
-             <button id="submit-flag-btn" class="flag-submit-btn">Report</button>
-           </div>
-       </div>
+                    <form id="action-form">
+                        <div class="form-row">
+                            <label for="response-name">Full Name:</label>
+                            <input type="text" id="response-name" name="response-name"required />
+                        </div>
 
-       <!-- Flag Report Confirmation Modal -->
-        <div id="flag-confirmation-modal" class="modal">
-            <div class="modal-content">
-                <span class="close-confirmation">&times;</span>
-                <h2 class="confirm-title">Report this Post</h2>
-                <p><strong>Thank you for your concern.</strong></p>
-                <p>Your report has been received and will help us keep PUPSeek a safe and trustworthy space.</p>
+                        <div class="form-row">
+                            <label for="response-contact">Contact Info:</label>
+                            <input type="text" id="response-contact" name="response-contact" required />
+                        </div>
+
+                        <div class="form-row">
+                            <label for="response-message">Message or Description:</label>
+                            <textarea id="response-message" name="response-message" maxlength="20" required></textarea>
+                        </div>
+
+                        <div class="form-submit-row">
+                            <button type="button" id="submit-action-btn" class="submit-action-btn color-secondary">Submit</button>
+                        </div>
+                    </form>
+
+                </div>
             </div>
-        </div>
 
-        <!-- Action Modal -->
-        <div id="action-modal" class="modal">
-            <div class="modal-content">
-                <span class="close-action-modal">&times;</span>
-                <h2 id="action-modal-title" class="modal-title color-secondary">Action Form</h2>
-
-                <form id="action-form">
-                    <div class="form-row">
-                        <label for="response-name">Full Name:</label>
-                        <input type="text" id="response-name" name="response-name"required />
-                    </div>
-
-                    <div class="form-row">
-                        <label for="response-contact">Contact Info:</label>
-                        <input type="text" id="response-contact" name="response-contact" required />
-                    </div>
-
-                    <div class="form-row">
-                        <label for="response-message">Message or Description:</label>
-                        <textarea id="response-message" name="response-message" maxlength="20" required></textarea>
-                    </div>
-
-                    <div class="form-submit-row">
-                        <button type="button" id="submit-action-btn" class="submit-action-btn color-secondary">Submit</button>
-                    </div>
-                </form>
-
+            <!-- Response Confirmation Modal -->
+            <div class="modal" id="response-confirmation-modal" style="display: none;">
+                <div class="modal-content confirmation-modal-content">
+                    <img src="assets/img/CONFIRMATION.png" alt="Confirmation" class="confirmation-image" />
+                    <h1 id="response-confirmation-message" class="confirmation-heading"></h1>
+                    <p id="response-confirmation-details" class="confirmation-details"></p>
+                    <button id="response-ok-btn" class="confirm-ok-btn">Okay</button>
+                </div>
             </div>
-        </div>
 
-        <!-- Response Confirmation Modal -->
-        <div class="modal" id="response-confirmation-modal" style="display: none;">
-            <div class="modal-content confirmation-modal-content">
-                <img src="assets/img/CONFIRMATION.png" alt="Confirmation" class="confirmation-image" />
-                <h1 id="response-confirmation-message" class="confirmation-heading"></h1>
-                <p id="response-confirmation-details" class="confirmation-details"></p>
-                <button id="response-ok-btn" class="confirm-ok-btn">Okay</button>
-            </div>
-        </div>
-
-
-    </main>
-  </div>
+        </main>
+    </div>
 
   <script type="module" src="assets/js/lost-found.js"></script>
 </body>

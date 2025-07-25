@@ -1,21 +1,10 @@
 import { getRepresentative } from '../../utils/api.js';
+import { showSpinner, hideSpinner } from './spinner.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
   const sidebarRes = await fetch('components/base.html');
   const sidebarHtml = await sidebarRes.text();
   document.getElementById('sidebar-container').innerHTML = sidebarHtml;
-
-  const spinnerRes = await fetch('components/spinner.html');
-  const spinnerHtml = await spinnerRes.text();
-  document.body.insertAdjacentHTML('beforeend', spinnerHtml);
-
-  function showSpinner() {
-    document.getElementById('spinner')?.style.setProperty('display', 'flex', 'important');
-  }
-
-  function hideSpinner() {
-    document.getElementById('spinner')?.style.setProperty('display', 'none', 'important');
-  }
 
   const currentPath = window.location.pathname;
   document.querySelectorAll('.nav-links a').forEach(link => {
@@ -42,7 +31,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   header.appendChild(selectedText);
 
   showSpinner();
-
   try {
     const res = await getRepresentative(sectionId);
     const container = document.querySelector('.rep-info');
