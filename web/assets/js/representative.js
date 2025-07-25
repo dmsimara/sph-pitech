@@ -1,10 +1,13 @@
 import { getRepresentative } from '../../utils/api.js';
 import { showSpinner, hideSpinner } from './spinner.js';
+import { setupSidebarToggle } from './base.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
   const sidebarRes = await fetch('components/base.html');
   const sidebarHtml = await sidebarRes.text();
   document.getElementById('sidebar-container').innerHTML = sidebarHtml;
+
+  setupSidebarToggle();
 
   const currentPath = window.location.pathname;
   document.querySelectorAll('.nav-links a').forEach(link => {

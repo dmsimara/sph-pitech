@@ -137,3 +137,48 @@ main p {
   scrollbar-width: thin;
   scrollbar-color: var(--color-secondary) #f1f1f1;
 }
+
+@media (max-width: 768px) {
+  .directory-header {
+    margin-top: 3rem;  
+    padding: 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .directory-header h1 {
+    font-size: 1.6rem;
+    margin-top: -0.5rem;
+    margin-bottom: -1rem;
+    margin-left: 0;
+  }
+
+  .directory-header .back-button {
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1rem;
+  }
+
+  .guidelines-content {
+    padding: 1rem;
+    font-size: 0.95rem;
+    text-align: justify;
+  }
+
+  main h3 {
+    font-size: 1.2rem;
+  }
+
+  main ul {
+    padding-left: 1.5rem;
+  }
+
+  main li {
+    font-size: 0.95rem;
+  }
+
+  main p {
+    font-size: 0.95rem;
+  }
+}

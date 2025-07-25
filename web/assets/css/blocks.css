@@ -87,3 +87,43 @@ body {
 .back-button:hover {
   background-color: var(--color-accent);
 }
+
+@media (max-width: 768px) {
+  .directory-header {
+    margin-top: 3rem;  
+    padding: 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .directory-header h1 {
+    font-size: 1.8rem;
+    margin-top: -0.5rem;
+    margin-bottom: -1rem;
+  }
+
+  .directory-header .back-button {
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1rem;
+  }
+
+  .directory-header p,
+  #selected-program {
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    margin-left: 0;
+  }
+
+  .blocks-container {
+    padding: 1.5rem 1rem;
+    gap: 1rem;
+    margin-top: -1rem;
+    margin-left: 1rem;
+  }
+
+  .block-text {
+    font-size: 1rem;
+  }
+}

@@ -110,3 +110,46 @@ body {
 .proceed-btn:hover {
   opacity: 0.9;
 }
+
+@media (max-width: 768px) {
+  .directory-header {
+    padding-left: 1rem;
+    margin-top: 2.8rem;
+  }
+
+  .directory-header h1 {
+    font-size: 2rem;
+    text-align: left;
+  }
+
+  .directory-selection {
+    padding-left: 1.5rem;
+  }
+
+  .directory-selection h2 {
+    font-size: 1rem;
+    padding-left: 0;
+    margin-bottom: 0.3rem;
+  }
+
+  #college-dropdown,
+  #program-dropdown,
+  #year-dropdown {
+    margin-left: 0;
+    width: 95%;
+    height: 2.5rem;
+    font-size: 0.9rem;
+    padding: 0.4rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .proceed-container {
+    padding: 1rem;
+    justify-content: center;
+  }
+
+  .proceed-btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 1.5rem;
+  }
+}

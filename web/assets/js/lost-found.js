@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("search-input").addEventListener("input", function () {
     const query = this.value.trim().toLowerCase();
 
-    let filtered = allReports;
+    let filtered = [...allReports].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
     if (currentFilter === 'completed') {
      filtered = filtered.filter(r => r.status.toLowerCase() === 'completed');
@@ -451,7 +451,7 @@ function renderReports(filter) {
   const container = document.getElementById('reports-container');
   container.innerHTML = '';
 
-  let filtered = allReports;
+  let filtered = [...allReports].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
   if (filter === 'completed') {
     filtered = allReports.filter(r => r.status.toLowerCase() === 'completed');

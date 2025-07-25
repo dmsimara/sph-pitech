@@ -1,8 +1,11 @@
+import { setupSidebarToggle } from './base.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
   const sidebarRes = await fetch('components/base.html');
   const sidebarHtml = await sidebarRes.text();
   document.getElementById('sidebar-container').innerHTML = sidebarHtml;
+
+  setupSidebarToggle();
 
   const currentPath = window.location.pathname.split('/').pop();
   const previousPath = sessionStorage.getItem("guidelinesFrom")?.split('/').pop();

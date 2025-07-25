@@ -23,12 +23,12 @@ body {
     background-color: var(--color-bg);
     height: 100%;
     margin: 0;
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 #main-content {
   overflow-y: auto;
-  height: 100vh;  
+  max-height: 100vh;  
   padding: 30px;
 }
 
@@ -710,4 +710,110 @@ select.form-input {
   color: var(--color-secondary) !important;
   font-weight: bold;
   border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  html,
+  body {
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .main-content {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+  }
+
+  .directory-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1.5rem 1rem 0 1rem;
+  }
+
+  .directory-header .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .directory-header h1 {
+    font-size: 1.8rem;
+    margin: 0;
+  }
+
+  .back-button {
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 0.9rem;
+    margin-left: 0;
+  }
+
+  .report-actions {
+    align-self: flex-start;
+    margin-top: 0.5rem;
+    padding-right: 1rem;
+  }
+
+  .report-info {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    margin-top: 1rem;
+    gap: 1.5rem;
+    overflow-y: visible;  
+  }
+
+  .report-photo {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .report-photo img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+
+  .info-details {
+    width: 100%;
+    margin: 0;
+    padding: 0 0.5rem;
+  }
+
+  .info-details p {
+    font-size: 1rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    margin-top: -13rem;
+  }
+
+  .action-buttons button {
+    width: 50%;
+    max-width: 300px;
+    padding: 12px 16px;
+    font-size: 1rem;
+  }
+
+  .action-buttons button {
+    width: 100%;
+    max-width: 300px;     
+    min-width: unset;      
+    padding: 12px 16px;
+    font-size: 0.95rem;
+  }
 }

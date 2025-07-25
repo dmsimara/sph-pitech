@@ -81,3 +81,45 @@ body {
   width: 40px;
   height: auto;
 }
+
+@media (max-width: 768px) {
+  .title h1 {
+    line-height: 3rem;  
+    padding-left: 2rem;  
+    text-align: left;
+    margin-bottom: -1rem;
+  }
+
+  .sections {
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 1rem;
+    gap: 1.5rem;
+  }
+
+  .class-directory,
+  .lost-found {
+    width: 100%;
+    max-width: 90%;
+    min-height: 200px;  
+    padding: 1.5rem;
+  }
+
+  .class-directory p,
+  .lost-found p {
+    font-size: 0.95rem;
+    margin-top: 1rem;
+  }
+
+  .class-directory h3,
+  .lost-found h3 {
+    font-size: 1.5rem;
+  }
+
+  .class-directory a img,
+  .lost-found a img {
+    margin-top: 1rem;
+    margin-bottom: -0.5rem;
+    width: 30px;
+  }
+}
