@@ -4,6 +4,20 @@ let allReports = [];
 let currentFilter = "all";
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const spinnerRes = await fetch('components/spinner.html');
+  const spinnerHtml = await spinnerRes.text();
+  document.body.insertAdjacentHTML('beforeend', spinnerHtml);
+
+  function showSpinner() {
+    document.getElementById('spinner')?.style.setProperty('display', 'flex', 'important');
+  }
+
+  function hideSpinner() {
+    document.getElementById('spinner')?.style.setProperty('display', 'none', 'important');
+  }
+
+  showSpinner();
+
   const sidebarRes = await fetch('components/base.html');
   const sidebarHtml = await sidebarRes.text();
   document.getElementById('sidebar-container').innerHTML = sidebarHtml;
@@ -37,6 +51,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (err) {
     console.error('Failed to load reports:', err);
     renderMessage('No records yet.');
+  } finally {
+    hideSpinner();
   }
 
   document.querySelectorAll('.filter-tag').forEach(tag => {
@@ -127,7 +143,6 @@ function setupModalListeners() {
     }
   });
 
-
   closeBtn.addEventListener('click', () => {
     modal.style.display = 'none';
   });
@@ -206,8 +221,6 @@ function setupModalListeners() {
   });
 }
 
-
-
 function setupFlagSubmission() {
   const submitBtn = document.getElementById("submit-flag-btn");
   const flagModal = document.getElementById("flag-modal");
@@ -224,11 +237,14 @@ function setupFlagSubmission() {
     }
 
     try {
+      showSpinner();
       await submitFlag(reportId, selectedReason);
+      hideSpinner();
 
       flagModal.style.display = "none";
       confirmationModal.style.display = "flex";
     } catch (err) {
+      hideSpinner();
       console.error("Error submitting flag:", err);
       alert("Something went wrong while reporting.");
     }
@@ -335,6 +351,8 @@ document.getElementById('submit-report').addEventListener('click', async (e) => 
   };
 
   try {
+    showSpinner();
+
     const response = await submitReport(formData);
     console.log("Submitted report:", response);
 
@@ -362,6 +380,8 @@ document.getElementById('submit-report').addEventListener('click', async (e) => 
       confirmationDetails.textContent = "You'll see claim requests here from users who think it's theirs.";
     }
 
+    hideSpinner();
+
     confirmationModal.style.display = 'flex';
     document.getElementById('report-modal').style.display = 'none';
 
@@ -370,6 +390,7 @@ document.getElementById('submit-report').addEventListener('click', async (e) => 
     setupFlagModalListeners();
 
   } catch (err) {
+    hideSpinner();
     alert(`Submission failed: ${err.message}`);
   }
 });
@@ -404,11 +425,15 @@ document.getElementById('submit-action-btn').addEventListener('click', async () 
   }
 
   try {
+    showSpinner();
+
     await submitResponse(reportId, {
       name,
       contact_info: contact,
       message
     });
+
+    hideSpinner();
 
     const modalTitle = document.querySelector("#action-modal h2")?.textContent?.trim();
 
@@ -430,7 +455,8 @@ document.getElementById('submit-action-btn').addEventListener('click', async () 
   } catch (err) {
     console.error("Error submitting response:", err);
     alert("Failed to send response. Please try again.");
-  }
+    hideSpinner();
+  } 
 });
 
 function renderReports(filter) {

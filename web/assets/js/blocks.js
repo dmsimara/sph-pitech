@@ -5,6 +5,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   const sidebarHtml = await sidebarRes.text();
   document.getElementById('sidebar-container').innerHTML = sidebarHtml;
 
+  const spinnerRes = await fetch('components/spinner.html');
+  const spinnerHtml = await spinnerRes.text();
+  document.body.insertAdjacentHTML('beforeend', spinnerHtml);
+
+  function showSpinner() {
+    document.getElementById('spinner')?.style.setProperty('display', 'flex', 'important');
+  }
+
+  function hideSpinner() {
+    document.getElementById('spinner')?.style.setProperty('display', 'none', 'important');
+  }
+
   const currentPath = window.location.pathname;
   document.querySelectorAll('.nav-links a').forEach(link => {
     const href = link.getAttribute('href');
@@ -25,39 +37,48 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  const data = await getFinderData();
-  const selectedCollege = data.colleges.find(c => c.name === college);
-  const selectedProgram = selectedCollege?.programs.find(p => p.name === program);
-  const selectedYear = selectedProgram?.year_levels.find(y => y.year === year);
+  showSpinner();
 
-  const programNameMap = {
-    "BSIT": "Bachelor of Science in Information Technology (BSIT)",
-    "BSCS": "Bachelor of Science in Computer Science (BSCS)"
-  };
+  try {
+    const data = await getFinderData();
+    const selectedCollege = data.colleges.find(c => c.name === college);
+    const selectedProgram = selectedCollege?.programs.find(p => p.name === program);
+    const selectedYear = selectedProgram?.year_levels.find(y => y.year === year);
 
-  const fullProgramName = programNameMap[program] || program;
+    const programNameMap = {
+      "BSIT": "Bachelor of Science in Information Technology (BSIT)",
+      "BSCS": "Bachelor of Science in Computer Science (BSCS)"
+    };
 
-  const headerEl = document.querySelector('.directory-header');
-  const programPara = document.createElement('p');
-  programPara.textContent = fullProgramName;
-  headerEl.appendChild(programPara);
+    const fullProgramName = programNameMap[program] || program;
 
-  if (selectedYear?.sections) {
-    selectedYear.sections.forEach(section => {
-        const blocksContainer = document.getElementById('blocks-container');
-        const sectionEl = document.createElement('p');
-        sectionEl.className = 'block-text';
-        sectionEl.textContent = section;
-        sectionEl.style.cursor = 'pointer';
+    const headerEl = document.querySelector('.directory-header');
+    const programPara = document.createElement('p');
+    programPara.textContent = fullProgramName;
+    headerEl.appendChild(programPara);
 
-        sectionEl.addEventListener('click', () => {
-            localStorage.setItem('selectedSection', section);
-            window.location.href = 'representative.html';
-        });
+    if (selectedYear?.sections) {
+      selectedYear.sections.forEach(section => {
+          const blocksContainer = document.getElementById('blocks-container');
+          const sectionEl = document.createElement('p');
+          sectionEl.className = 'block-text';
+          sectionEl.textContent = section;
+          sectionEl.style.cursor = 'pointer';
 
-        blocksContainer.appendChild(sectionEl);
-    });
-  } else {
-    blocksContainer.innerHTML += '<p>No blocks available for this selection.</p>';
+          sectionEl.addEventListener('click', () => {
+              localStorage.setItem('selectedSection', section);
+              window.location.href = 'representative.html';
+          });
+
+          blocksContainer.appendChild(sectionEl);
+      });
+    } else {
+      blocksContainer.innerHTML += '<p>No blocks available for this selection.</p>';
+    }
+  } catch (err) {
+    console.error(err);
+    document.getElementById('blocks-container').innerHTML += '<p>Error loading blocks.</p>';
+  } finally {
+    hideSpinner();
   }
 });

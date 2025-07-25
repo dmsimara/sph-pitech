@@ -2,6 +2,16 @@ import { getAllReports, updateReport, deleteReport, markReportAsCompleted, getRe
 
 let verifiedCode = ""; 
 
+// Spinner functions defined globally
+function showSpinner() {
+  document.getElementById('spinner')?.style.setProperty('display', 'flex', 'important');
+}
+
+function hideSpinner() {
+  document.getElementById('spinner')?.style.setProperty('display', 'none', 'important');
+}
+
+
 async function loadReportDetails() {
   const urlParams = new URLSearchParams(window.location.search);
   const reportId = urlParams.get('report_id');
@@ -12,6 +22,7 @@ async function loadReportDetails() {
   }
 
   try {
+    showSpinner();
     const reports = await getAllReports();
     const report = reports.find(r => r.report_id === reportId);
 
@@ -102,6 +113,8 @@ async function loadReportDetails() {
 
   } catch (err) {
     console.error("Failed to load report:", err);
+  } finally {
+    hideSpinner();
   }
 }
 
@@ -140,6 +153,7 @@ function setupEditIconListeners() {
     }
 
     try {
+      showSpinner();
       await updateReport(reportId, {}, codeEntered);  
       verifiedCode = codeEntered;
 
@@ -215,6 +229,8 @@ function setupEditIconListeners() {
     } catch (err) {
       console.error(`${mode} failed:`, err);
       document.getElementById("code-error").style.display = "block";
+    } finally {
+      hideSpinner();
     }
   });
 
@@ -263,6 +279,7 @@ document.getElementById("edit-report-form").addEventListener("submit", async (e)
   };
 
   try {
+    showSpinner();
     await updateReport(reportId, updatedData, verifiedCode);
 
     document.getElementById("edit-report-modal").style.display = "none";
@@ -273,6 +290,8 @@ document.getElementById("edit-report-form").addEventListener("submit", async (e)
 
   } catch (err) {
     alert(`Failed to update: ${err.message}`);
+  } finally {
+    hideSpinner();
   }
 });
 
@@ -289,6 +308,7 @@ document.getElementById("confirm-delete-btn").addEventListener("click", async ()
   }
 
   try {
+    showSpinner();
     await deleteReport(reportId, verifiedCode);
 
     document.getElementById("delete-modal").style.display = "none";
@@ -299,6 +319,8 @@ document.getElementById("confirm-delete-btn").addEventListener("click", async ()
 
   } catch (err) {
     alert(`Failed to delete: ${err.message}`);
+  } finally {
+    hideSpinner();
   }
 });
 
@@ -328,6 +350,10 @@ window.addEventListener('click', (e) => {
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const spinnerRes = await fetch('components/spinner.html');
+  const spinnerHtml = await spinnerRes.text();
+  document.body.insertAdjacentHTML('beforeend', spinnerHtml);
+  
   const sidebarRes = await fetch('components/base.html');
   const sidebarHtml = await sidebarRes.text();
   document.getElementById('sidebar-container').innerHTML = sidebarHtml;
@@ -349,7 +375,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.location.href = `lost-found.html?filter=${filter}`;
   });
 
-  await loadReportDetails();
+  try {
+    showSpinner();
+    await loadReportDetails();
+  } catch (err) {
+    console.error("Failed to load report details:", err);
+    alert("Something went wrong while loading the report.");
+  } finally {
+    hideSpinner();
+  }
+
   setupEditIconListeners();
 
   document.getElementById("confirm-ok-btn").addEventListener("click", () => {
@@ -372,6 +407,7 @@ document.getElementById("confirm-complete-btn").addEventListener("click", async 
   }
 
   try {
+    showSpinner();
     await markReportAsCompleted(reportId, verifiedCode);
 
     document.getElementById("completed-modal").style.display = "none";
@@ -380,6 +416,8 @@ document.getElementById("confirm-complete-btn").addEventListener("click", async 
     document.getElementById("confirmation-modal").style.display = "flex";
   } catch (err) {
     alert(`Failed to mark as completed: ${err.message}`);
+  } finally {
+    hideSpinner();
   }
 });
 

@@ -5,6 +5,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   const sidebarHtml = await sidebarRes.text();
   document.getElementById('sidebar-container').innerHTML = sidebarHtml;
 
+  const spinnerRes = await fetch('components/spinner.html');
+  const spinnerHtml = await spinnerRes.text();
+  document.body.insertAdjacentHTML('beforeend', spinnerHtml);
+
+  function showSpinner() {
+    document.getElementById('spinner')?.style.setProperty('display', 'flex', 'important');
+  }
+
+  function hideSpinner() {
+    document.getElementById('spinner')?.style.setProperty('display', 'none', 'important');
+  }
+
   const currentPath = window.location.pathname;
   document.querySelectorAll('.nav-links a').forEach(link => {
     const href = link.getAttribute('href');
@@ -29,6 +41,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   selectedText.style.fontWeight = 'bold';
   header.appendChild(selectedText);
 
+  showSpinner();
+
   try {
     const res = await getRepresentative(sectionId);
     const container = document.querySelector('.rep-info');
@@ -49,5 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (err) {
     console.error(err);
     document.querySelector('.rep-info').innerHTML += `<p>Error fetching representative info.</p>`;
+  } finally {
+    hideSpinner();
   }
 });

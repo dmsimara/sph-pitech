@@ -1,13 +1,27 @@
 document.addEventListener("DOMContentLoaded", async () => {
+  const spinnerRes = await fetch('components/spinner.html');
+  const spinnerHtml = await spinnerRes.text();
+  document.body.insertAdjacentHTML('beforeend', spinnerHtml);
+
+  function showSpinner() {
+    document.getElementById('spinner')?.style.setProperty('display', 'flex', 'important');
+  }
+
+  function hideSpinner() {
+    document.getElementById('spinner')?.style.setProperty('display', 'none', 'important');
+  }
+
+  showSpinner();
+
   const sidebarRes = await fetch('components/base.html');
   const sidebarHtml = await sidebarRes.text();
   document.getElementById('sidebar-container').innerHTML = sidebarHtml;
 
-  const currentPath = window.location.pathname.split('/').pop(); 
-  const previousPath = sessionStorage.getItem("guidelinesFrom")?.split('/').pop(); 
+  const currentPath = window.location.pathname.split('/').pop();
+  const previousPath = sessionStorage.getItem("guidelinesFrom")?.split('/').pop();
 
   document.querySelectorAll('.nav-links a').forEach(link => {
-    const linkPath = link.getAttribute('href');
+    const linkPath = link.getAttribute('href')?.split('/').pop();
 
     if (linkPath === currentPath) {
       link.classList.add("active");
@@ -21,11 +35,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   const backButton = document.querySelector(".back-button");
-  if (from && backButton) {
+  if (previousPath && backButton) {
     backButton.setAttribute("href", previousPath);
-  } else {
+  } else if (backButton) {
     backButton.setAttribute("href", "lost-found.html");
   }
+
+  hideSpinner();
 });
 
 window.addEventListener("beforeunload", () => {

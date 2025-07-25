@@ -16,6 +16,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   const sidebarHtml = await sidebarRes.text();
   document.getElementById('sidebar-container').innerHTML = sidebarHtml;
 
+  const spinnerRes = await fetch('components/spinner.html');
+  const spinnerHtml = await spinnerRes.text();
+  document.body.insertAdjacentHTML('beforeend', spinnerHtml);
+
+  function showSpinner() {
+    document.getElementById('spinner')?.style.setProperty('display', 'flex', 'important');
+  }
+
+  function hideSpinner() {
+    document.getElementById('spinner')?.style.setProperty('display', 'none', 'important');
+  }
+
   const currentPath = window.location.pathname;
   document.querySelectorAll('.nav-links a').forEach(link => {
     const href = link.getAttribute('href');
@@ -27,7 +39,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  showSpinner();
   initDropdowns();
+  hideSpinner();
 });
 
 let academicData = null;
@@ -40,7 +54,6 @@ async function initDropdowns() {
   try {
     academicData = await getFinderData();
 
-    // Populate College dropdown
     academicData.colleges.forEach(college => {
       const option = document.createElement('option');
       option.value = college.name;
@@ -51,7 +64,6 @@ async function initDropdowns() {
     console.error('Error loading finder data:', err);
   }
 
-  // College → Program
   collegeDropdown.addEventListener('change', () => {
     const selectedCollege = academicData.colleges.find(c => c.name === collegeDropdown.value);
 
@@ -90,7 +102,6 @@ async function initDropdowns() {
   });
 }
 
-// Handle Proceed Button
 const proceedBtn = document.querySelector('.proceed-btn');
 
 proceedBtn.addEventListener('click', () => {
