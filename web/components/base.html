@@ -19,19 +19,33 @@
         <a href="directory.html"><i class="fas fa-folder"></i> Class Directory</a>
         <a href="lost-found.html"><i class="fas fa-magnifying-glass"></i> Lost & Found</a>
       </nav>
+
+      <footer class="sidebar-footer">
+        <a href="guidelines.html" onclick="sessionStorage.setItem('guidelinesFrom', window.location.pathname)">Community Guidelines</a>
+      </footer>
     </aside>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const currentPath = window.location.pathname;  
+      const currentPath = window.location.pathname.split('/').pop(); 
+      const previousPath = sessionStorage.getItem('guidelinesFrom')?.split('/').pop(); 
       const links = document.querySelectorAll('.nav-links a');
 
       links.forEach(link => {
-        const linkPath = new URL(link.href).pathname;  
+        const linkPath = link.getAttribute('href');
 
         if (linkPath === currentPath) {
           link.classList.add('active');
+
+        } else if (
+          currentPath === 'guidelines.html' &&
+          previousPath &&
+          linkPath === previousPath
+        ) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
         }
       });
     });
