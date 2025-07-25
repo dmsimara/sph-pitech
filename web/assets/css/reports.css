@@ -263,9 +263,9 @@ body {
   background-color: #fff;
   padding: 32px 28px;
   border-radius: 12px;
-  width: 500px; /* WIDER */
+  width: 500px;  
   max-width: 90%;
-  max-height: 85vh; /* REDUCED HEIGHT */
+  max-height: 85vh;  
   overflow-y: auto;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   text-align: center;
@@ -273,7 +273,7 @@ body {
 }
 
 .code-modal-image {
-  width: 110px; /* BIGGER */
+  width: 110px; 
   margin: 0 auto 20px;
   display: block;
 }
@@ -420,6 +420,25 @@ body {
 
 #edit-report-form input[type="file"] {
   padding: 6px;
+}
+
+select.form-input {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  background-color: #5A5A5A1A;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #333;
+  appearance: none;  
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23666' height='18' viewBox='0 0 24 24' width='18' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem;
+  cursor: pointer;
 }
 
 #edit-report-form .form-actions {

@@ -119,7 +119,6 @@ function setupModalListeners() {
     if (selectedRadio) {
       selectedRadio.dispatchEvent(new Event('change'));
     } else {
-      // Default to lost if no option is preselected
       const lostRadio = document.querySelector('input[name="report-type"][value="lost"]');
       if (lostRadio) {
         lostRadio.checked = true;
@@ -246,6 +245,19 @@ function setupFlagSubmission() {
   });
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+  const itemSelect = document.getElementById("item-name-select");
+  const customItemRow = document.getElementById("custom-item-row");
+
+  itemSelect.addEventListener("change", () => {
+    if (itemSelect.value === "Other") {
+      customItemRow.style.display = "flex";
+    } else {
+      customItemRow.style.display = "none";
+    }
+  });
+});
+
 document.getElementById('submit-report').addEventListener('click', async (e) => {
   e.preventDefault();
 
@@ -253,7 +265,11 @@ document.getElementById('submit-report').addEventListener('click', async (e) => 
   if (!form) return alert("Form not found!");
 
   const type = form.querySelector('input[name="report-type"]:checked')?.value;
-  const itemName = form.querySelector("#item-name")?.value.trim();
+  let itemName = form.querySelector("#item-name-select")?.value;
+  if (itemName === "Other") {
+    itemName = form.querySelector("#custom-item-name")?.value.trim();
+  }
+
   const contactInfo = form.querySelector("#contact-input")?.value.trim();
   const isSurrendered = form.querySelector("#is-surrendered")?.checked;
 
@@ -269,7 +285,6 @@ document.getElementById('submit-report').addEventListener('click', async (e) => 
   console.log("foundCode:", `"${foundCode}"`);
   console.log("foundConfirmCode:", `"${foundConfirmCode}"`);
 
-  // VALIDATIONS
   if (!type || !itemName || !contactInfo) {
     alert("Please fill in all required fields.");
     return;
@@ -417,7 +432,6 @@ document.getElementById('submit-action-btn').addEventListener('click', async () 
     alert("Failed to send response. Please try again.");
   }
 });
-
 
 function renderReports(filter) {
   sessionStorage.setItem('lastFilter', filter);

@@ -50,9 +50,25 @@
                         </div>
                     </div>
 
-                    <div class="form-row">
+                   <div class="form-row">
                         <label class="form-label">Item Name:</label>
-                        <input type="text" id="item-name" class="form-input" maxlength="6"/>
+                        <select id="item-name-select" class="form-input">
+                            <option value="">-- Select an item --</option>
+                            <option value="ID Card">ID Card</option>
+                            <option value="Wallet/Money">Wallet/Money</option>
+                            <option value="Phone/Gadget">Phone/Gadget</option>
+                            <option value="Bag/Pouch">Bag/Pouch</option>
+                            <option value="Notebook/Document">Notebook/Document</option>
+                            <option value="Keys/Keychain">Keys/Keychain</option>
+                            <option value="Clothing/Shoes">Clothing/Shoes</option>
+                            <option value="Accessory/Jewelry">Accessory/Jewelry</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row" id="custom-item-row" style="display: none;">
+                        <label class="form-label">Specify Item:</label>
+                        <input type="text" id="custom-item-name" class="form-input" placeholder="Enter item name" maxlength="30">
                     </div>
 
                     <div class="form-row">

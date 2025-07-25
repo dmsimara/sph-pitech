@@ -148,7 +148,26 @@ function setupEditIconListeners() {
         const report = reports.find(r => r.report_id === reportId);
         if (!report) throw new Error("Report not found.");
 
-        document.getElementById("edit-item-name").value = report.item_name || '';
+        const itemSelect = document.getElementById("edit-item-name-select");
+        const customInputRow = document.getElementById("edit-custom-item-row");
+        const customInput = document.getElementById("edit-custom-item-name");
+
+        if (!itemSelect || !customInputRow || !customInput) {
+          console.error("Edit item name fields not found in DOM.");
+          return;
+        }
+
+        const match = [...itemSelect.options].find(opt => opt.value === report.item_name);
+        if (match) {
+          itemSelect.value = report.item_name;
+          customInputRow.style.display = "none";
+          customInput.value = "";
+        } else {
+          itemSelect.value = "Other";
+          customInput.value = report.item_name;
+          customInputRow.style.display = "flex";
+        }
+
         document.getElementById("edit-contact-info").value = report.contact_info || '';
         document.getElementById("edit-description").value = report.description || '';
 
@@ -190,7 +209,6 @@ function setupEditIconListeners() {
         }
       }
 
-
       document.getElementById("code-modal").style.display = "none";
       document.getElementById("code-error").style.display = "none";
 
@@ -210,6 +228,19 @@ function setupEditIconListeners() {
   });
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+  const select = document.getElementById("edit-item-name-select");
+  const customInputRow = document.getElementById("edit-custom-item-row");
+
+  select.addEventListener("change", () => {
+    if (select.value === "Other") {
+      customInputRow.style.display = "flex";
+    } else {
+      customInputRow.style.display = "none";
+    }
+  });
+});
+
 document.getElementById("edit-report-form").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -220,8 +251,13 @@ document.getElementById("edit-report-form").addEventListener("submit", async (e)
     return;
   }
 
+  let itemName = document.getElementById("edit-item-name-select").value;
+  if (itemName === "Other") {
+    itemName = document.getElementById("edit-custom-item-name").value.trim();
+  }
+
   const updatedData = {
-    item_name: document.getElementById("edit-item-name").value.trim(),
+    item_name: itemName,
     contact_info: document.getElementById("edit-contact-info").value.trim(),
     description: document.getElementById("edit-description").value.trim()
   };
@@ -318,8 +354,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.getElementById("confirm-ok-btn").addEventListener("click", () => {
     document.getElementById("confirmation-modal").style.display = "none";
-    window.location.href = "lost-found.html";
+    const currentUrl = window.location.href;
+    window.location.href = currentUrl;
   });
+
 });
 
 document.getElementById("cancel-complete-btn").addEventListener("click", () => {

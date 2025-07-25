@@ -435,6 +435,17 @@ input[type="file"].form-input {
   border: none;
 }
 
+select.form-input {
+  appearance: none;  
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23666' height='18' viewBox='0 0 24 24' width='18' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem;
+  cursor: pointer;
+}
+
 .info-reminder {
   display: flex;
   align-items: center;
