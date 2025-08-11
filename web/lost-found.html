@@ -66,7 +66,7 @@
                     <div class="form-row">
                             <label class="form-label">Item Name:</label>
                             <select id="item-name-select" class="form-input">
-                                <option value="">-- Select an item --</option>
+                                <option value="" disabled selected>-- Select an item --</option>
                                 <option value="ID Card">ID Card</option>
                                 <option value="Wallet/Money">Wallet/Money</option>
                                 <option value="Phone/Gadget">Phone/Gadget</option>
@@ -91,22 +91,22 @@
 
                         <div class="form-row">
                             <label class="form-label">Contact Info:</label>
-                            <input type="text" id="contact-input" class="form-input"/>
+                            <input type="text" id="contact-input" class="form-input" placeholder="e.g., phone, email, Facebook link"/>
                         </div>
 
                         <div class="form-row" id="description-row" style="display: none;">
                             <label class="form-label" for="description">Description:</label>
-                            <input type="text" id="description" name="description" maxlength="20" class="form-input" />
+                            <input type="text" id="description" name="description" maxlength="50" class="form-input" placeholder="e.g., blue umbrella (up to 50 characters)"/>
                         </div>
 
                         <div class="form-row" id="code-row" style="display: none;">
                             <label class="form-label" for="management-code">Set Personal Code:</label>
-                            <input type="password" id="management-code" name="management-code" class="form-input" placeholder="Set a 6-character code." maxlength="6"/>
+                            <input type="password" id="management-code" name="management-code" class="form-input" placeholder="Set a code (4–14 letters or numbers)" minlength="4" maxlength="14"/>
                         </div>
 
                         <div class="form-row" id="confirm-code-row" style="display: none;">
                             <label class="form-label" for="confirm-management-code">Confirm your Code:</label>
-                            <input type="password" id="confirm-management-code" name="confirm-management-code" class="form-input" placeholder="Re-enter your 6-character code to confirm." maxlength="6"/>
+                            <input type="password" id="confirm-management-code" name="confirm-management-code" class="form-input" placeholder="Re-enter your code to confirm" minlength="4" maxlength="14"/>
                         </div>
                         <div class="info-reminder" id="code-info-reminder" style="display: none;">
                             <i class="fas fa-info-circle"></i>
@@ -116,7 +116,7 @@
 
                         <!-- FOUND UNIQUE INPUTS -->
                         <div class="form-row" id="surrendered-row" style="display: none;">
-                            <label></label> <!-- empty label to align -->
+                            <label></label>  
                             <div class="form-field checkbox-row">
                                     <input type="checkbox" id="is-surrendered" name="is-surrendered" />
                                     <p class="surrender-note">
@@ -209,17 +209,17 @@
                     <form id="action-form">
                         <div class="form-row">
                             <label for="response-name">Full Name:</label>
-                            <input type="text" id="response-name" name="response-name"required />
+                            <input type="text" id="response-name" name="response-name" placeholder="e.g., Juan Dela Cruz" required />
                         </div>
 
                         <div class="form-row">
                             <label for="response-contact">Contact Info:</label>
-                            <input type="text" id="response-contact" name="response-contact" required />
+                            <input type="text" id="response-contact" name="response-contact" placeholder="e.g., phone, email, Facebook link" required />
                         </div>
 
                         <div class="form-row">
                             <label for="response-message">Message or Description:</label>
-                            <textarea id="response-message" name="response-message" maxlength="20" required></textarea>
+                            <textarea id="response-message" name="response-message" maxlength="50" required></textarea>
                         </div>
 
                         <div class="form-submit-row">

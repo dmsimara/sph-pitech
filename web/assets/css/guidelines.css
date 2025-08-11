@@ -33,10 +33,11 @@ body {
 
 .main-content {
   flex: 1;
-  overflow-y: auto;
   padding: 2rem;
   color: var(--color-secondary);
   background-color: var(--color-bg);
+  display: flex;
+  flex-direction: column;
 }
 
 .directory-header {
@@ -117,6 +118,10 @@ main p {
   max-width: 950px;
   margin: 0 auto;
   text-align: justify;
+  flex: 1;  
+  overflow-y: auto;
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  padding-right: 1.5rem !important;
 }
 
 ::-webkit-scrollbar {
@@ -180,5 +185,18 @@ main p {
 
   main p {
     font-size: 0.95rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .guidelines-content {
+    padding: 0;
+    margin-left: 5rem;
+  }
+}
+
+@supports not (padding-bottom: env(safe-area-inset-bottom)) {
+  .guidelines-content {
+    padding-bottom: 4rem;  
   }
 }

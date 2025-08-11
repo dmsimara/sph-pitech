@@ -299,12 +299,14 @@ document.getElementById('submit-report').addEventListener('click', async (e) => 
   }
 
   if (type === "lost") {
+    const codePattern = /^[A-Za-z0-9]{4,14}$/;
+
     if (!description || !code || !confirmCode) {
       alert("Please complete all required fields for lost items.");
       return;
     }
-    if (code.length !== 6 || confirmCode.length !== 6) {
-      alert("Your code must be exactly 6 characters.");
+    if (!codePattern.test(code) || !codePattern.test(confirmCode)) {
+      alert("Your code must be 4–14 letters or numbers (no spaces or special characters).");
       return;
     }
     if (code !== confirmCode) {
@@ -315,12 +317,14 @@ document.getElementById('submit-report').addEventListener('click', async (e) => 
   }
 
   if (type === "found" && !isSurrendered) {
+    const codePattern = /^[A-Za-z0-9]{4,14}$/;
+
     if (!foundCode || !foundConfirmCode) {
       alert("Please complete the code fields for found item.");
       return;
     }
-    if (foundCode.length !== 6 || foundConfirmCode.length !== 6) {
-      alert("Your code must be exactly 6 characters.");
+    if (!codePattern.test(foundCode) || !codePattern.test(foundConfirmCode)) {
+      alert("Your code must be 4–14 letters or numbers (no spaces or special characters).");
       return;
     }
     if (foundCode !== foundConfirmCode) {
@@ -473,6 +477,15 @@ function renderReports(filter) {
     const card = document.createElement('div');
     card.className = 'report-card';
 
+    const createdDate = new Date(report.created_at + 'Z').toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+
     card.addEventListener('click', () => {
       window.location.href = `reports.html?report_id=${report.report_id}`;
     });
@@ -513,7 +526,7 @@ function renderReports(filter) {
         <strong>Type:</strong> 
         <span class="type-pill ${report.type.toLowerCase()}">${report.type.charAt(0).toUpperCase() + report.type.slice(1)}</span>
       </p>
-      <p><strong>Created:</strong> ${new Date(report.created_at).toLocaleString()}</p>
+      <p><strong>Created:</strong> ${createdDate}</p>
     `;
 
     if (!isHidden) {

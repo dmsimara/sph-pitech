@@ -5,37 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PUPSeek</title>
     <link rel="icon" type="image/x-icon" href="assets/img/PUPSEEK1.png">
+    <link rel="stylesheet" href="assets/css/spinner.css">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
+    <div id="spinner" class="spinner-overlay">
+        <div class="spinner-container">
+        <div class="cube-spinner">
+            <div class="cube1"></div>
+            <div class="cube2"></div>
+            <div class="cube3"></div>
+            <div class="cube4"></div>
+        </div>
+        <p class="loading-text">Loading, please wait...</p>
+        </div>
+    </div>
+
     <div class="splash-wrapper">
         <img src="assets/img/PUPSEEK1.png" id="image1" class="splash-image" />
         <img src="assets/img/PUPSEEK2.png" id="image2" class="splash-image" />
     </div>
 
     <script>
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('load', () => {
+        document.getElementById('spinner').style.display = 'none';
+
         const image1 = document.getElementById('image1');
         const image2 = document.getElementById('image2');
 
         setTimeout(() => {
-        image1.classList.add('show');
-
-        setTimeout(() => {
-            image1.classList.remove('show');
+            image1.classList.add('show');
 
             setTimeout(() => {
-            image2.classList.add('show');
+                image1.classList.remove('show');
 
-            setTimeout(() => {
-                window.location.href = 'home.html';
+                setTimeout(() => {
+                    image2.classList.add('show');
+
+                    setTimeout(() => {
+                        window.location.href = 'home.html';
+                    }, 1000);
+
+                }, 500);
             }, 1000);
 
-            }, 500); 
-        }, 1000);
-
-        }, 500); 
+        }, 500);
     });
     </script>
+
 </body>
 </html>

@@ -1,4 +1,4 @@
-import { getAllReports, updateReport, deleteReport, markReportAsCompleted, getReportResponses } from '../../utils/api.js';
+import { getAllReports, updateReport, deleteReport, markReportAsCompleted, getReportResponses, uploadPhoto } from '../../utils/api.js';
 import { showSpinner, hideSpinner } from './spinner.js';
 import { setupSidebarToggle } from './base.js';
 
@@ -22,6 +22,15 @@ async function loadReportDetails() {
       document.querySelector('.directory-header h1').textContent = "Report Not Found";
       return;
     }
+
+    const createdDate = new Date(report.created_at + 'Z').toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
 
     const mainTitle = report.type === 'lost' ? "Lost Item" : "Found Item";
     document.querySelector('.directory-header h1').textContent = mainTitle;
@@ -49,12 +58,12 @@ async function loadReportDetails() {
         <div style="background: #f0f0f0; padding: 8px; border-radius: 4px; margin-bottom: 12px; font-weight: bold; color: var(--color-secondary);">
           ${report.description}
         </div>
-        <p><strong>Reported On:</strong> ${new Date(report.created_at).toLocaleString()}</p>
+        <p><strong>Reported On:</strong> ${createdDate}</p>
         <p><strong>Status:</strong> <span class="status-pill ${statusClass}">${statusLabel}</span></p>
       `;
     } else if (report.type === 'found') {
       infoHTML += `
-        <p><strong>Reported On:</strong> ${new Date(report.created_at).toLocaleString()}</p>
+        <p><strong>Reported On:</strong> ${createdDate}</p>
         <p><strong>Status:</strong> <span class="status-pill ${statusClass}">${statusLabel}</span></p>
         <div style="background: #f0f0f0; padding: 8px; border-radius: 4px; margin-top: 12px; font-style: italic; color: var(--color-secondary);">
           <i class="fas fa-info-circle"></i> 
@@ -79,7 +88,8 @@ async function loadReportDetails() {
         const codeModal = document.getElementById("code-modal");
         codeModal.setAttribute("data-mode", "view");
         codeModal.setAttribute("data-report-id", report.report_id);
-        codeModal.setAttribute("data-report-type", report.type); 
+        codeModal.setAttribute("data-report-type", report.type);
+
         document.getElementById("code-input").value = "";
         document.getElementById("code-error").style.display = "none";
         codeModal.style.display = "flex";
@@ -88,19 +98,31 @@ async function loadReportDetails() {
       const btn2 = document.createElement('button');
       btn2.className = 'btn-filled-secondary';
       btn2.textContent = 'Mark as Completed';
-      btn2.addEventListener('click', () => {
-        const codeModal = document.getElementById("code-modal");
-        codeModal.setAttribute("data-mode", "complete"); 
-        codeModal.setAttribute("data-report-id", report.report_id);
+      if (report.status === 'completed') {
+        btn2.disabled = true;
+        btn2.style.opacity = '0.6';
+        btn2.style.cursor = 'not-allowed'
+      } else {
+        btn2.addEventListener('click', () => {
+          const codeModal = document.getElementById("code-modal");
+          codeModal.setAttribute("data-mode", "complete"); 
+          codeModal.setAttribute("data-report-id", report.report_id);
 
-        document.getElementById("code-input").value = "";
-        document.getElementById("code-error").style.display = "none";
-        codeModal.style.display = "flex";
-      });
+          document.getElementById("code-input").value = "";
+          document.getElementById("code-error").style.display = "none";
+          codeModal.style.display = "flex";
+        });
+      }
 
       btnContainer.appendChild(btn1);
       btnContainer.appendChild(btn2);
-      document.querySelector('.report-info').insertAdjacentElement('afterend', btnContainer);
+
+      const infoDetailsContainer = document.querySelector('.info-details');
+      if (infoDetailsContainer) {
+        infoDetailsContainer.appendChild(btnContainer);
+      } else {
+        document.querySelector('.report-info').appendChild(btnContainer);
+      }
     }
 
     if (report.type === "found" && report.is_surrendered) {
@@ -261,35 +283,41 @@ document.addEventListener("DOMContentLoaded", () => {
 document.getElementById("edit-report-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   showSpinner();
-
+  
   const reportId = document.getElementById("code-modal").getAttribute("data-report-id");
-
+  
   if (!reportId || !verifiedCode) {
     alert("Missing report ID or verified code.");
     hideSpinner();
     return;
   }
-
+  
   let itemName = document.getElementById("edit-item-name-select").value;
   if (itemName === "Other") {
     itemName = document.getElementById("edit-custom-item-name").value.trim();
   }
-
+  
   const updatedData = {
     item_name: itemName,
     contact_info: document.getElementById("edit-contact-info").value.trim(),
     description: document.getElementById("edit-description").value.trim()
   };
-
+  
   try {
     await updateReport(reportId, updatedData, verifiedCode);
-
+    
+    const photoInput = document.getElementById("edit-photo");
+    if (photoInput && photoInput.files && photoInput.files.length > 0) {
+      const photoFile = photoInput.files[0];
+      await uploadPhoto(reportId, photoFile);
+    }
+    
     document.getElementById("edit-report-modal").style.display = "none";
-
+    
     document.getElementById("confirmation-message").textContent = "Changes Saved!";
     document.getElementById("confirmation-details").textContent = "The report has been updated successfully.";
     document.getElementById("confirmation-modal").style.display = "flex";
-
+    
   } catch (err) {
     alert(`Failed to update: ${err.message}`);
   } finally {
@@ -321,6 +349,12 @@ document.getElementById("confirm-delete-btn").addEventListener("click", async ()
     document.getElementById("confirmation-details").textContent = "The report and all its associated data have been removed.";
     document.getElementById("confirmation-modal").style.display = "flex";
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const filter = urlParams.get('from') || 'all';
+
+    setTimeout(() => {
+      window.location.href = `lost-found.html?filter=${filter}`;
+    }, 2000);
   } catch (err) {
     alert(`Failed to delete: ${err.message}`);
   } finally {
@@ -426,4 +460,16 @@ document.querySelectorAll('.close-modal-x').forEach(btn => {
     const modalId = btn.getAttribute('data-close');
     document.getElementById(modalId).style.display = 'none';
   });
+});
+
+const togglePassword = document.getElementById('toggle-password-visibility');
+const passwordInput = document.getElementById('code-input');
+
+togglePassword.addEventListener('click', () => {
+  const isPassword = passwordInput.type === 'password';
+
+  passwordInput.type = isPassword ? 'text' : 'password';
+  togglePassword.classList.toggle('fa-eye');
+  togglePassword.classList.toggle('fa-eye-slash');
+  togglePassword.title = isPassword ? 'Hide password' : 'Show password';
 });

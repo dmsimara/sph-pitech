@@ -58,10 +58,11 @@
                     <img src="assets/img/PASSKEY.png" alt="Passkey" class="code-modal-image" />
 
                     <h2 id="code-modal-title">Enter Management Code</h2>
-                    <p class="code-modal-text">Please enter the 6-digit passcode associated with this report.</p>
+                    <p class="code-modal-text">Please enter the passcode associated with this report.</p>
 
                     <div class="input-wrapper">
-                        <input type="password" id="code-input" class="code-input" maxlength="6" />
+                        <input type="password" id="code-input" class="code-input" minlength="4" maxlength="14" style="padding-right: 2.5rem"/>
+                        <i id="toggle-password-visibility" class="fas fa-eye" title="Show password"></i>
                     </div>
                     <p id="code-error" class="code-error-msg" style="display:none;">Invalid or missing code.</p>
 
@@ -177,8 +178,6 @@
                     <button id="confirm-ok-btn" class="confirm-ok-btn">Okay</button>
                 </div>
             </div>
-
-
         </main>
     </div>
 

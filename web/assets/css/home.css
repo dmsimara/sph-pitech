@@ -42,44 +42,49 @@ body {
   margin: 1rem auto;
 }
 
+.card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  flex: 1;
+  max-width: 40%;
+}
+
 .class-directory,
 .lost-found {
-  flex: 1;
-  max-width: 40%; 
-  height: 400px;   
+  height: 400px;
   background: linear-gradient(to bottom left, var(--color-accent), var(--color-secondary));
   padding: 2rem;
   border-radius: 1.5rem;
-  color: white;
-  font-family: var(--font-main);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  color: white;
+  font-family: var(--font-main);
 }
 
 .class-directory h3,
 .lost-found h3 {
-  font-size: 2rem;
-  margin-bottom: 0.1rem;
+  font-size: 2.2rem;
   line-height: 1.1;
 }
 
 .class-directory p,
 .lost-found p {
-  font-size: 1rem;
+  font-size: 1.2rem;
   margin-bottom: 0;
   margin-top: -7rem; 
 }
 
-.class-directory a,
-.lost-found a {
-  align-self: flex-end; 
+#direct {
+  margin-bottom: 2rem;
 }
 
-.class-directory a img,
-.lost-found a img {
+.class-directory img,
+.lost-found img {
   width: 40px;
   height: auto;
+  align-self: flex-end;
 }
 
 @media (max-width: 768px) {
